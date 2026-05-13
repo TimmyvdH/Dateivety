@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dateivety</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --cream:        #FDF5EC;
+      --peach:        #F5E2CC;
+      --peach-light:  #FAF0E4;
+      --terra:        #C4704B;
+      --terra-dark:   #A3502E;
+      --terra-light:  #E89A76;
+      --gold:         #D4A056;
+      --brown-dark:   #2C1A0E;
+      --brown-mid:    #6B4226;
+      --brown-light:  #A07048;
+      --rose:         #F0C0A8;
+      --card-bg:      #FFFAF5;
+      --border:       #EDD5BA;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      font-family: 'Inter', sans-serif;
+      color: var(--brown-dark);
+      overflow-x: hidden;
+    }
+
+    /* ── Layout ── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      min-height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .screen.active { display: flex; }
+
+    /* ══════════════════════════════
+       WELCOME SCREEN
+    ══════════════════════════════ */
+    #screen-welcome {
+      background: linear-gradient(160deg, #FDF5EC 0%, #F5DFC4 55%, #EDD0AA 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 32px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #screen-welcome::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(212,160,86,.18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    #screen-welcome::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -80px;
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(196,112,75,.14) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .welcome-icon {
+      font-size: 72px;
+      margin-bottom: 24px;
+      display: block;
+      animation: float 3.2s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--terra-dark);
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+    }
+    .logo span { color: var(--terra); }
+
+    .tagline {
+      font-size: 15px;
+      color: var(--brown-mid);
+      line-height: 1.6;
+      max-width: 270px;
+      margin: 0 auto 48px;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--terra) 0%, var(--terra-dark) 100%);
+      color: #fff;
+      border: none;
+      padding: 18px 52px;
+      border-radius: 100px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(196,112,75,.38);
+      transition: transform .15s, box-shadow .15s;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-start:active {
+      transform: scale(.97);
+      box-shadow: 0 5px 14px rgba(196,112,75,.38);
+    }
+
+    /* ══════════════════════════════
+       QUESTION SCREENS
+    ══════════════════════════════ */
+    .q-header {
+      background: linear-gradient(160deg, var(--peach) 0%, var(--cream) 100%);
+      padding: 52px 24px 28px;
+      position: relative;
+    }
+    .btn-back {
+      position: absolute;
+      top: 16px; left: 16px;
+      background: none;
+      border: none;
+      color: var(--brown-mid);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: color .15s;
+    }
+    .btn-back:active { color: var(--terra); }
+
+    .progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .p-seg {
+      flex: 1;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--border);
+      transition: background .35s;
+    }
+    .p-seg.on { background: var(--terra); }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--terra);
+      margin-bottom: 10px;
+    }
+
+    .q-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--brown-dark);
+      line-height: 1.3;
+    }
+
+    .q-body {
+      flex: 1;
+      padding: 20px 16px 8px;
+      overflow-y: auto;
+    }
+
+    .multi-hint {
+      font-size: 13px;
+      color: var(--brown-light);
+      font-style: italic;
+      margin-bottom: 14px;
+      padding: 0 4px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, box-shadow .18s;
+      user-select: none;
+    }
+    .opt:active { transform: scale(.985); }
+    .opt.selected {
+      border-color: var(--terra);
+      background: linear-gradient(135deg, rgba(196,112,75,.06) 0%, rgba(212,160,86,.06) 100%);
+      box-shadow: 0 4px 18px rgba(196,112,75,.14);
+    }
+
+    .opt-icon { font-size: 28px; flex-shrink: 0; width: 36px; text-align: center; }
+    .opt-text { flex: 1; }
+    .opt-label { font-size: 16px; font-weight: 500; color: var(--brown-dark); }
+    .opt-sub   { font-size: 12px; color: var(--brown-light); margin-top: 2px; }
+
+    .opt-check {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .18s;
+    }
+    .opt.selected .opt-check {
+      background: var(--terra);
+      border-color: var(--terra);
+    }
+    .opt-check::after {
+      content: '';
+      display: none;
+      width: 6px; height: 10px;
+      border: 2.5px solid #fff;
+      border-top: none; border-left: none;
+      transform: rotate(45deg) translateY(-1px);
+    }
+    .opt.selected .opt-check::after { display: block; }
+
+    .q-footer {
+      padding: 14px 16px 36px;
+      background: var(--cream);
+    }
+
+    .btn-next {
+      width: 100%;
+      background: linear-gradient(135deg, var(--terra) 0%, var(--terra-dark) 100%);
+      color: #fff;
+      border: none;
+      padding: 18px;
+      border-radius: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(196,112,75,.3);
+      transition: opacity .18s, transform .15s;
+      opacity: .45;
+      pointer-events: none;
+    }
+    .btn-next.on {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .btn-next:active { transform: scale(.98); }
+
+    /* ══════════════════════════════
+       LOADING SCREEN
+    ══════════════════════════════ */
+    #screen-loading {
+      background: linear-gradient(160deg, #FDF5EC 0%, #F5DFC4 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .loading-icon {
+      font-size: 60px;
+      margin-bottom: 24px;
+      animation: pulse 1.3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.18); }
+    }
+
+    .loading-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--brown-dark);
+      margin-bottom: 8px;
+    }
+    .loading-sub { font-size: 14px; color: var(--brown-mid); }
+
+    /* ══════════════════════════════
+       RESULTS SCREEN
+    ══════════════════════════════ */
+    .results-header {
+      background: linear-gradient(160deg, var(--peach) 0%, var(--cream) 100%);
+      padding: 52px 22px 24px;
+    }
+
+    .results-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--brown-dark);
+      margin-bottom: 6px;
+      padding-right: 52px;
+    }
+    .results-sub { font-size: 13px; color: var(--brown-light); margin-bottom: 14px; padding-right: 52px; }
+
+    .results-badge {
+      display: inline-block;
+      background: var(--terra);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 100px;
+    }
+
+    .results-body {
+      flex: 1;
+      padding: 14px 14px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Activity card */
+    .a-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 2px 14px rgba(0,0,0,.04);
+    }
+    .a-card:active {
+      transform: scale(.985);
+      box-shadow: 0 1px 6px rgba(0,0,0,.04);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-emoji { font-size: 38px; line-height: 1; flex-shrink: 0; }
+    .card-thumb-wrap {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-thumb-wrap .card-emoji {
+      font-size: 38px;
+      line-height: 1;
+    }
+    .card-thumb {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      object-fit: cover;
+    }
+    .card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--brown-dark);
+      line-height: 1.3;
+      margin-bottom: 3px;
+    }
+    .card-type { font-size: 12px; color: var(--brown-light); font-weight: 500; }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--brown-mid);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: rgba(139,90,60,0.12);
+      color: var(--brown-dark);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 100px;
+    }
+    .tag-gold { background: rgba(139,90,60,0.12); color: var(--brown-dark); }
+
+    .sort-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--cream);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .sort-bar::-webkit-scrollbar { display: none; }
+    .sort-pill {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1.5px solid var(--brown-light);
+      background: transparent;
+      color: var(--brown-mid);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .sort-pill.active {
+      background: var(--terra);
+      border-color: var(--terra);
+      color: #fff;
+    }
+
+    .results-footer {
+      padding: 14px 16px 36px;
+      background: var(--cream);
+    }
+    .btn-restart {
+      width: 100%;
+      background: transparent;
+      border: 2px solid var(--terra);
+      color: var(--terra);
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-restart:active { background: rgba(196,112,75,.07); }
+
+    /* ══════════════════════════════
+       MODAL
+    ══════════════════════════════ */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(44,26,14,.52);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: 28px 28px 0 0;
+      padding: 20px 22px 52px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 82vh;
+      overflow-y: auto;
+      animation: slideUp .28s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 0 auto 22px;
+    }
+
+    .modal-hero-wrap {
+      position: relative;
+      width: calc(100% + 44px);
+      margin: -22px -22px 22px;
+      height: 220px;
+      overflow: hidden;
+      border-radius: 26px 26px 0 0;
+      background: linear-gradient(135deg, var(--terra) 0%, var(--terra-dark) 100%);
+    }
+    .modal-hero {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: var(--peach);
+    }
+    .modal-hero-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.62) 100%);
+      pointer-events: none;
+    }
+    .modal-hero-text {
+      position: absolute;
+      bottom: 16px;
+      left: 18px;
+      right: 52px;
+    }
+    .modal-emoji { font-size: 52px; text-align: center; display: block; margin-bottom: 14px; }
+    .modal-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 3px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .modal-type { font-size: 12px; color: rgba(255,255,255,0.82); margin-bottom: 0; }
+    .modal-desc {
+      font-size: 15px;
+      color: var(--brown-mid);
+      line-height: 1.65;
+      margin-bottom: 22px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .m-detail {
+      background: var(--peach-light);
+      border-radius: 14px;
+      padding: 13px;
+    }
+    .m-detail-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: var(--brown-light);
+      margin-bottom: 4px;
+    }
+    .m-detail-val { font-size: 15px; font-weight: 600; color: var(--brown-dark); }
+
+    .modal-cats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+    .m-cat {
+      background: rgba(196,112,75,.1);
+      color: var(--terra-dark);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 100px;
+    }
+
+    .btn-close {
+      width: 100%;
+      background: linear-gradient(135deg, var(--terra) 0%, var(--terra-dark) 100%);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+    .modal-close-row {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-close-row .btn-close {
+      flex: 1;
+    }
+    .btn-next-surprise {
+      flex: 1.4;
+      background: linear-gradient(135deg, var(--terra) 0%, var(--terra-dark) 100%);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: none;
+    }
+
+    /* ══════════════════════════════
+       NO RESULTS
+    ══════════════════════════════ */
+    .no-results {
+      text-align: center;
+      padding: 48px 20px;
+    }
+    .no-results-icon { font-size: 52px; margin-bottom: 16px; }
+    .no-results-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--brown-dark);
+      margin-bottom: 8px;
+    }
+    .no-results-text { font-size: 14px; color: var(--brown-mid); line-height: 1.55; }
+
+    /* ══════════════════════════════
+       FAVORITES
+    ══════════════════════════════ */
+
+    /* Hartje-knop op kaart */
+    .fav-btn {
+      position: absolute;
+      top: 14px; right: 14px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--peach-light);
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      cursor: pointer;
+      transition: background .18s, transform .15s, border-color .18s;
+      flex-shrink: 0;
+      z-index: 2;
+    }
+    .fav-btn:active { transform: scale(.88); }
+    .fav-btn.on {
+      background: #FDE8E8;
+      border-color: #E87070;
+    }
+
+    /* Kaart relatief zodat .fav-btn absoluut kan */
+    .a-card { position: relative; }
+
+    /* Favorietenknop in modal */
+    .btn-fav-modal {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.22);
+      border: 1.5px solid rgba(255,255,255,0.4);
+      color: #fff;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all .18s;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+    .btn-fav-modal:active { background: rgba(255,255,255,0.35); }
+    .btn-fav-modal.on {
+      background: rgba(255,80,80,0.75);
+      border-color: rgba(255,80,80,0.6);
+    }
+
+
+    /* Favorieten-knop in header (results + welcome) */
+    .icon-btn {
+      position: absolute;
+      top: 52px; right: 20px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      transition: transform .15s;
+      z-index: 10;
+    }
+    .icon-btn:active { transform: scale(.9); }
+
+    /* Badge op het hartje (aantal favorieten) */
+    .fav-count-badge {
+      position: absolute;
+      top: -5px; right: -5px;
+      background: var(--terra);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      display: none;
+    }
+    .fav-count-badge.show { display: flex; }
+
+    /* Welkom-scherm hartje knop */
+    .welcome-fav-btn {
+      position: absolute;
+      top: 24px; right: 20px;
+      background: rgba(255,255,255,.55);
+      border: 1.5px solid rgba(196,112,75,.25);
+      border-radius: 50%;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background .18s, transform .15s;
+    }
+    .welcome-fav-btn:active { transform: scale(.9); }
+
+    /* Favorieten scherm */
+    .favs-header {
+      background: linear-gradient(160deg, var(--peach) 0%, var(--cream) 100%);
+      padding: 52px 22px 24px;
+      position: relative;
+    }
+    .favs-back {
+      position: absolute;
+      top: 52px; left: 18px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--brown-mid);
+      padding: 4px;
+      line-height: 1;
+    }
+    .favs-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--brown-dark);
+      margin-bottom: 4px;
+      padding-left: 44px;
+    }
+    .favs-sub { font-size: 13px; color: var(--brown-light); padding-left: 44px; }
+
+    .favs-body {
+      flex: 1;
+      padding: 14px 14px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .favs-empty {
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .favs-empty-icon { font-size: 56px; margin-bottom: 18px; }
+    .favs-empty-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--brown-dark);
+      margin-bottom: 8px;
+    }
+    .favs-empty-text { font-size: 14px; color: var(--brown-mid); line-height: 1.55; }
+
+    /* ══════════════════════════════
+       NAAM SCHERM
+    ══════════════════════════════ */
+    #screen-name {
+      background: linear-gradient(160deg, #FDF5EC 0%, #F5DFC4 55%, #EDD0AA 100%);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 32px 64px;
+    }
+    .name-icon { font-size: 64px; margin-bottom: 20px; display: block; }
+    .name-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px; font-weight: 700;
+      color: var(--brown-dark); margin-bottom: 10px;
+    }
+    .name-sub { font-size: 15px; color: var(--brown-mid); margin-bottom: 32px; max-width: 260px; }
+    .name-input {
+      width: 100%; background: var(--card-bg);
+      border: 2px solid var(--border); border-radius: 16px;
+      padding: 16px 20px; font-size: 18px;
+      font-family: 'Inter', sans-serif; color: var(--brown-dark);
+      text-align: center; margin-bottom: 20px;
+      outline: none; transition: border-color .18s;
+    }
+    .name-input:focus { border-color: var(--terra); }
+    .name-input::placeholder { color: var(--brown-light); }
+
+    /* ══════════════════════════════
+       WELKOM — EXTRA
+    ══════════════════════════════ */
+    .welcome-greeting {
+      font-size: 16px; color: var(--brown-mid);
+      margin-bottom: 4px; font-style: italic;
+    }
+    .when-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 1.4px; text-transform: uppercase;
+      color: var(--brown-light); margin-bottom: 10px;
+    }
+    .when-chips {
+      display: flex; flex-wrap: wrap;
+      gap: 8px; justify-content: center; margin: 0 0 28px;
+    }
+    .when-chip {
+      background: rgba(255,255,255,.6);
+      border: 1.5px solid rgba(196,112,75,.25);
+      border-radius: 100px; padding: 9px 18px;
+      font-size: 13px; font-weight: 500;
+      color: var(--brown-mid); cursor: pointer;
+      transition: all .18s; user-select: none;
+    }
+    .when-chip.sel { background: var(--terra); border-color: var(--terra); color: #fff; }
+    .btn-surprise {
+      margin-top: 12px; background: transparent;
+      border: 2px solid rgba(196,112,75,.4); color: var(--terra);
+      padding: 14px 36px; border-radius: 100px;
+      font-size: 15px; font-weight: 600;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+      transition: all .18s; position: relative; z-index: 1;
+    }
+    .btn-surprise:active { background: rgba(196,112,75,.08); }
+
+    /* ══════════════════════════════
+       WEERBANNER
+    ══════════════════════════════ */
+    .weather-banner {
+      display: none; background: #E8F3FF;
+      border-bottom: 1px solid #BCD5F5;
+      padding: 10px 16px; font-size: 13px;
+      color: #1A4A7A; gap: 8px; align-items: center;
+    }
+    .weather-banner.show { display: flex; }
+    .tag-rain { background: #D1EDFF !important; color: #1A4A7A !important; }
+
+    /* ══════════════════════════════
+       MODAL — MAPS + BEOORDELING
+    ══════════════════════════════ */
+    .modal-actions {
+      display: flex; gap: 10px; margin-bottom: 12px;
+    }
+    .modal-action-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+      padding: 11px 6px; border-radius: 14px;
+      border: 1.5px solid var(--border);
+      background: var(--card-bg); color: var(--brown-mid);
+      font-size: 11px; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer; text-decoration: none;
+      transition: background .15s;
+    }
+    .modal-action-btn:active { background: var(--peach-light); }
+    .modal-action-btn .action-icon { font-size: 20px; line-height: 1; }
+    .modal-action-whatsapp {
+      background: #25D366; border-color: #25D366; color: #fff;
+    }
+    .modal-action-whatsapp:active { background: #1ebe5d; }
+
+    /* ── Locaties sectie ── */
+    .locations-section {
+      background: var(--peach-light); border-radius: 16px;
+      margin-bottom: 10px; overflow: hidden;
+    }
+    .locations-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 13px 16px; cursor: pointer; user-select: none;
+      font-weight: 600; font-size: 14px; color: var(--brown-mid);
+    }
+    .locations-header:active { background: rgba(0,0,0,.04); }
+    .locations-arrow { transition: transform .2s; font-size: 11px; }
+    .locations-arrow.open { transform: rotate(180deg); }
+    .locations-list { padding: 0 12px 4px; }
+    .location-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 4px; border-top: 1px solid var(--border);
+    }
+    .location-item:first-child { border-top: none; }
+    .location-empty { padding: 10px 4px; font-size: 13px; color: var(--muted); font-style: italic; }
+    .location-name-link { color: var(--coral); text-decoration: none; font-weight: 600; }
+    .location-name-link:hover { text-decoration: underline; }
+    .location-pin { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .location-info { flex: 1; }
+    .location-name {
+      font-size: 14px; font-weight: 600; color: var(--brown-dark);
+      margin-bottom: 2px;
+    }
+    .location-tip { font-size: 12px; color: var(--brown-mid); line-height: 1.4; }
+    .location-link {
+      font-size: 12px; color: var(--terra); font-weight: 600;
+      text-decoration: none; display: inline-block; margin-top: 3px;
+    }
+    .locations-more-btn {
+      display: block; width: 100%; background: none; border: none;
+      color: var(--terra); font-size: 13px; font-weight: 600;
+      padding: 10px 16px; cursor: pointer; text-align: center;
+      border-top: 1px solid var(--border); font-family: 'Inter', sans-serif;
+    }
+    .btn-suggest {
+      display: block; background: none; border: none;
+      color: var(--brown-light); font-size: 12px;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      text-align: center; width: 100%;
+      padding: 4px 0 12px; transition: color .15s;
+    }
+    .btn-suggest:active { color: var(--terra); }
+    .modal-rating {
+      background: var(--peach-light); border-radius: 16px;
+      padding: 14px 16px; margin-bottom: 12px; text-align: center;
+    }
+    .rating-label { font-size: 13px; color: var(--brown-mid); margin-bottom: 8px; }
+    .rating-stars { display: flex; justify-content: center; gap: 4px; }
+    .star-btn {
+      background: none; border: none; font-size: 26px;
+      cursor: pointer; padding: 2px; transition: transform .15s; line-height: 1;
+    }
+    .star-btn:active { transform: scale(.82); }
+    .card-stars { display: flex; align-items: center; gap: 1px; font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAAM INVOER (eerste keer) ── -->
+<div id="screen-name" class="screen">
+  <span class="name-icon">👋</span>
+  <h1 class="name-title">Hoe heet jij?</h1>
+  <p class="name-sub">Zodat ik je persoonlijk kan aanspreken.</p>
+  <input type="text" id="name-input" class="name-input" placeholder="Jouw voornaam…" maxlength="24" autocomplete="off"
+    oninput="App.onNameInput(this.value)"
+    onkeydown="if(event.key==='Enter')App.saveName()">
+  <button class="btn-start" id="btn-name" style="opacity:.45;pointer-events:none" onclick="App.saveName()">Verder →</button>
+</div>
+
+<!-- ── WELCOME ── -->
+<div id="screen-welcome" class="screen active">
+  <button class="welcome-fav-btn" onclick="App.openFavs('welcome')" title="Mijn favorieten">
+    <span class="btn-emoji">🤍</span>
+    <span class="fav-count-badge" id="welcome-fav-badge"></span>
+  </button>
+  <span class="welcome-icon">💑</span>
+  <div class="logo">Date<span>ivety</span></div>
+  <p class="welcome-greeting" id="welcome-greeting" style="display:none"></p>
+  <p class="tagline">Vind jullie perfecte date in 30 seconden. Zonder gedoe.</p>
+  <div class="when-label">Wanneer gaan jullie?</div>
+  <div class="when-chips">
+    <div class="when-chip sel" data-v="any"     onclick="App.pickWhen('any')">🤷 Maakt niet uit</div>
+    <div class="when-chip"     data-v="overdag" onclick="App.pickWhen('overdag')">☀️ Overdag</div>
+    <div class="when-chip"     data-v="avond"   onclick="App.pickWhen('avond')">🌙 Vanavond</div>
+    <div class="when-chip"     data-v="weekend" onclick="App.pickWhen('weekend')">📅 Weekend</div>
+  </div>
+  <button class="btn-start" onclick="App.start()">Laten we beginnen →</button>
+  <button class="btn-surprise" onclick="App.surprise()">🎲 Verras me!</button>
+</div>
+
+<!-- ── VRAAG 1: Vibe ── -->
+<div id="screen-q1" class="screen">
+  <div class="q-header">
+    <button class="btn-back" onclick="App.restart()">← Terug</button>
+    <div class="progress-bar">
+      <div class="p-seg on"></div>
+      <div class="p-seg"></div>
+      <div class="p-seg"></div>
+      <div class="p-seg"></div>
+    </div>
+    <div class="step-label">Stap 1 van 4</div>
+    <div class="q-title">Wat voor soort date zoeken jullie?</div>
+  </div>
+  <div class="q-body">
+    <p class="multi-hint">Kies er maximaal 2</p>
+    <div class="options-list" id="q1-list"></div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-next" id="btn1" onclick="App.toQ2()">Volgende</button>
+  </div>
+</div>
+
+<!-- ── VRAAG 2: Activiteit ── -->
+<div id="screen-q2" class="screen">
+  <div class="q-header">
+    <button class="btn-back" onclick="App.back('screen-q1')">← Terug</button>
+    <div class="progress-bar">
+      <div class="p-seg on"></div>
+      <div class="p-seg on"></div>
+      <div class="p-seg"></div>
+      <div class="p-seg"></div>
+    </div>
+    <div class="step-label">Stap 2 van 4</div>
+    <div class="q-title">Hoe actief mag het zijn?</div>
+  </div>
+  <div class="q-body">
+    <div class="options-list" id="q2-list"></div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-next" id="btn2" onclick="App.toQ3()">Volgende</button>
+  </div>
+</div>
+
+<!-- ── VRAAG 3: Tijd ── -->
+<div id="screen-q3" class="screen">
+  <div class="q-header">
+    <button class="btn-back" onclick="App.back('screen-q2')">← Terug</button>
+    <div class="progress-bar">
+      <div class="p-seg on"></div>
+      <div class="p-seg on"></div>
+      <div class="p-seg on"></div>
+      <div class="p-seg"></div>
+    </div>
+    <div class="step-label">Stap 3 van 4</div>
+    <div class="q-title">Hoeveel tijd hebben jullie?</div>
+  </div>
+  <div class="q-body">
+    <div class="options-list" id="q3-list"></div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-next" id="btn3" onclick="App.toQ4()">Volgende</button>
+  </div>
+</div>
+
+<!-- ── VRAAG 4: Budget ── -->
+<div id="screen-q4" class="screen">
+  <div class="q-header">
+    <button class="btn-back" onclick="App.back('screen-q3')">← Terug</button>
+    <div class="progress-bar">
+      <div class="p-seg on"></div>
+      <div class="p-seg on"></div>
+      <div class="p-seg on"></div>
+      <div class="p-seg on"></div>
+    </div>
+    <div class="step-label">Stap 4 van 4 — Laatste vraag!</div>
+    <div class="q-title">Wat is jullie budget per persoon?</div>
+  </div>
+  <div class="q-body">
+    <div class="options-list" id="q4-list"></div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-next" id="btn4" onclick="App.showResults()">Toon suggesties →</button>
+  </div>
+</div>
+
+<!-- ── LOADING ── -->
+<div id="screen-loading" class="screen">
+  <div class="loading-icon">💛</div>
+  <div class="loading-title">Ik zoek de beste dates voor jullie…</div>
+  <p class="loading-sub">Even geduld 🔍</p>
+</div>
+
+<!-- ── RESULTS ── -->
+<div id="screen-results" class="screen">
+  <div class="results-header" style="position:relative">
+    <button class="icon-btn" onclick="App.openFavs('results')" title="Mijn favorieten">
+      <span class="btn-emoji">🤍</span>
+      <span class="fav-count-badge" id="results-fav-badge"></span>
+    </button>
+    <div class="results-title">Jullie date-ideeën 🎉</div>
+    <div class="results-sub" id="results-sub"></div>
+    <span class="results-badge" id="results-badge"></span>
+  </div>
+  <div class="sort-bar">
+    <button class="sort-pill active" id="sort-default" onclick="App.setSort('default')">Aanbevolen</button>
+    <button class="sort-pill" id="sort-price" onclick="App.setSort('price')">Prijs ↑</button>
+    <button class="sort-pill" id="sort-dur" onclick="App.setSort('dur')">Duur ↑</button>
+    <button class="sort-pill" id="sort-rating" onclick="App.setSort('rating')">⭐ Beoordeling</button>
+  </div>
+  <div class="weather-banner" id="weather-banner">🌧️ Het regent buiten — buitenactiviteiten zijn gemarkeerd.</div>
+  <div class="results-body" id="results-body"></div>
+  <div class="results-footer">
+    <button class="btn-restart" onclick="App.restart()">↺ Opnieuw zoeken</button>
+  </div>
+</div>
+
+<!-- ── FAVORIETEN ── -->
+<div id="screen-favs" class="screen">
+  <div class="favs-header">
+    <button class="favs-back" id="favs-back-btn" onclick="App.closeFavs()">←</button>
+    <div class="favs-title">Mijn favorieten ❤️</div>
+    <div class="favs-sub" id="favs-sub"></div>
+  </div>
+  <div class="favs-body" id="favs-body"></div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-bg" id="modal-bg" onclick="App.closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hero-wrap" id="m-hero-wrap">
+      <img class="modal-hero" id="m-hero-img" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'">
+      <div class="modal-hero-gradient"></div>
+      <div class="modal-hero-text">
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-type" id="m-type"></div>
+      </div>
+      <button class="btn-fav-modal" id="m-fav-btn" onclick="App.toggleFavFromModal()">🤍</button>
+    </div>
+    <p  class="modal-desc"   id="m-desc"></p>
+    <div class="modal-grid"  id="m-grid"></div>
+    <div class="modal-actions">
+      <a class="modal-action-btn" id="m-maps-btn" href="#" target="_blank" rel="noopener">
+        <span class="action-icon">📍</span>
+        <span>Maps</span>
+      </a>
+      <a class="modal-action-btn" id="m-website-btn" href="#" target="_blank" rel="noopener" style="display:none">
+        <span class="action-icon">🌐</span>
+        <span>Website</span>
+      </a>
+      <button class="modal-action-btn modal-action-whatsapp" onclick="App.shareWhatsApp()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span>Delen</span>
+      </button>
+    </div>
+    <div class="locations-section" id="m-locations-section" style="display:none">
+      <div class="locations-header" onclick="App.toggleLocations()">
+        <span>📍 Locaties in Eindhoven</span>
+        <span class="locations-arrow" id="m-locations-arrow">▼</span>
+      </div>
+      <div class="locations-list" id="m-locations-list" style="display:none"></div>
+    </div>
+    <div class="modal-rating">
+      <div class="rating-label">Heb je dit al gedaan? Geef een beoordeling:</div>
+      <div class="rating-stars" id="m-stars">
+        <button class="star-btn" data-star="1" onclick="App.rateActivity(1)">☆</button>
+        <button class="star-btn" data-star="2" onclick="App.rateActivity(2)">☆</button>
+        <button class="star-btn" data-star="3" onclick="App.rateActivity(3)">☆</button>
+        <button class="star-btn" data-star="4" onclick="App.rateActivity(4)">☆</button>
+        <button class="star-btn" data-star="5" onclick="App.rateActivity(5)">☆</button>
+      </div>
+    </div>
+    <button class="btn-suggest" onclick="App.suggestLocation()">Ken jij een goede locatie? Laat het ons weten</button>
+    <div class="modal-close-row">
+      <button class="btn-close" onclick="App.closeModalDirect()">Sluiten</button>
+      <button class="btn-next-surprise" id="btn-next-surprise" onclick="App.nextSurprise()">Volgende →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════ */
+const ACTIVITIES = [
+  { id:1,  name:"Suppen",  type:"Wateractiviteiten",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"18+ (hoofdboeker); kinderen <18 onder toezicht", url:"https://www.eindjesuppen.nl/", emoji:"🏄", desc:"Stand-up paddleboarden op rustig water. Balanceren, lachen en samen genieten — perfect voor een zonnige dag in en rond Eindhoven." },
+  { id:2,  name:"Kanoën",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"15-40", dur:"2+ uur",   lvl:"middel", loc:"buiten", age:"Vanaf 4 jaar (met volwassene); 12+ alleen", url:"", emoji:"🛶", desc:"Samen het water op in een kano. Samenwerken, natuur en goed bijpraten — perfect op de Dommel of het Wilhelminakanaal." },
+  { id:3,  name:"Jetskiën",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"40+", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"18+ (vaarbewijs/leeftijdseis verhuurder)", url:"https://mudfactory.nl/jetskien/", emoji:"🌊", desc:"Volle vaart over het water op een jetski. Adrenaline, wind en water — voor wie echt even wil losgaan." },
+  { id:4,  name:"Waterscooteren",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"40+", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"18+ (verhuurder eis)", url:"https://mudfactory.nl/jetskien/waterscooter/", emoji:"💦", desc:"Een waterscooter de Dommel of het kanaal over — actief, nat en gegarandeerd lachen." },
+  { id:5,  name:"Waterskiën",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"15-40", dur:"2+ uur",   lvl:"hoog", loc:"buiten", age:"Vanaf 8 jaar (clinic 2-mast); 10+ aan 4-mast cablebaan", url:"https://www.cableparkaquabest.nl/waterskien", emoji:"🏂", desc:"Glijden over het water op ski's, getrokken door een kabel. Spannend, actief en heerlijk in de zomer." },
+  { id:6,  name:"Wakeboarden",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"15-40", dur:"2+ uur",   lvl:"hoog", loc:"buiten", age:"Vanaf 8 jaar (clinic); 10+ aan 4-mast cablebaan", url:"https://www.cableparkaquabest.nl/", emoji:"🏄", desc:"Wakeboard over het water — tricks, vallen, opstaan en weer proberen. Een uitdaging voor beiden." },
+  { id:91,  name:"Bootje huren (zelf varen door Eindhoven)",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"buiten", age:"Alle leeftijden", url:"", emoji:"⛵", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:92,  name:"Avond SUP tour (met verlichting / sunset)",  type:"Avontuurlijk",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"18+ (hoofdboeker); kinderen <18 onder toezicht", url:"https://www.eindjesuppen.nl/", emoji:"🏄", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:7,  name:"Boulderen",  type:"Sportief actief",  cats:["avontuurlijk"], price:"0-15", dur:"1-2 uur",   lvl:"hoog", loc:"binnen", age:"Vanaf 6 jaar", url:"https://boulderneoliet.nl/nl/eindhoven/", emoji:"🧗", desc:"Klauteren op de klimwand en elkaar aanmoedigen. Geen ervaring nodig — beginnerswanden zijn er voor iedereen." },
+  { id:8,  name:"Klimmen",  type:"Sportief actief",  cats:["avontuurlijk"], price:"0-15", dur:"1-2 uur",   lvl:"hoog", loc:"binnen", age:"Vanaf 8 jaar (jeugd); volwassenen via cursus/intro", url:"https://boulderneoliet.nl/nl/eindhoven/", emoji:"🏔️", desc:"Klimmen en boulderen bij Neoliet in Eindhoven. Motiveer elkaar, overwin je grenzen en geniet van de prestatie." },
+  { id:9,  name:"Trampoline springen",  type:"Sportief actief",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"binnen", age:"Mini Jump 2-5 jr (met begeleider 18+); algemeen alle leeftijden", url:"https://www.jumpxl.nl/vestigingen/eindhoven/", emoji:"🤸", desc:"Springen, stuiten en lachen. Een kinderlijk en energiek uitje dat niemand laat zitten." },
+  { id:93,  name:"Bijlwerpen (axe throwing)",  type:"Precisiespellen",  cats:["avontuurlijk","competitief"], price:"15-40", dur:"max 1 uur",   lvl:"middel", loc:"binnen", age:"18+ (alleen voor volwassenen)", url:"https://allineindhoven.nl/portfolio/bijlwerpen/", emoji:"🪓", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:14,  name:"Arcade games",  type:"Gaming & entertainment",  cats:["avontuurlijk"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Onder 14 jr onder begeleiding volwassene", url:"https://allineindhoven.nl/", emoji:"🕹️", desc:"Klassieke arcadekasten, flipperkast en retro games. Nostalgie, humor en een gezonde dosis competitie." },
+  { id:15,  name:"VR Gaming",  type:"Gaming & entertainment",  cats:["avontuurlijk","competitief"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Vanaf 7 jaar (afhankelijk van game)", url:"https://theparkplayground.com/nl-nl/onze-locaties/eindhoven", emoji:"🎮", desc:"Samen in een virtuele wereld. Van spannende avonturen tot hilarische multiplayer games — VR laat je allebei even helemaal losgaan." },
+  { id:67,  name:"VR escape experience",  type:"Gaming & entertainment",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Geschikt vanaf ca. 12 jaar", url:"https://enversed.com/", emoji:"🥽", desc:"Een volledig meeslepende virtual reality escape room bij Enversed. Samenwerken in een andere wereld — indrukwekkend en spannend." },
+  { id:16,  name:"Escaperooms",  type:"Team challenges",  cats:["avontuurlijk","competitief","sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Vanaf 12 jaar aanbevolen", url:"https://www.escaperoom-eindhoven.nl/nl/home", emoji:"🔐", desc:"Samen opgesloten, samen ontsnappen. Test hoe goed jullie communiceren en puzzelen onder tijdsdruk." },
+  { id:17,  name:"Citygames",  type:"Team challenges",  cats:["avontuurlijk","competitief","sociaal"], price:"15-40", dur:"max 1 uur",   lvl:"hoog", loc:"binnen", age:"Vanaf 8 jaar", url:"https://citygames.nl/", emoji:"🗺️", desc:"Een interactieve speurtocht door Eindhoven. Ontdek de stad terwijl jullie opdrachten oplossen en punten scoren." },
+  { id:94,  name:"Outdoor escape tocht (door stad/bos)",  type:"Team challenges",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Geen leeftijdsgrens (kindvriendelijk)", url:"https://escapetours.com/?msclkid=380c6f1e4ed3149299f306f82fba6e59&utm_source=bing&utm_medium=cpc&utm_campaign=Nederland%20-%20Generiek&utm_term=outdoor%20escape%20room&utm_content=Escape%20Room%20generiek%20-%20zinsdeel", emoji:"🔐", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:95,  name:"GPS-speurtocht met opdrachten",  type:"Team challenges",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Geen leeftijdsgrens", url:"https://speurtocht.nl/product/speurtocht-eindhoven/", emoji:"🗺️", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:18,  name:"iCombat",  type:"Combat & actie games",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"beide", age:"Vanaf 14 jaar", url:"https://www.lqehv.nl/", emoji:"⚔️", desc:"Hightech lasergevecht met militair aandoende uitrusting. Tactischer dan lasergame en perfect voor wie van strategie houdt." },
+  { id:19,  name:"Karten",  type:"Motorsport & rijden",  cats:["avontuurlijk","competitief"], price:"15-40", dur:"max 1 uur",   lvl:"hoog", loc:"binnen", age:"Vanaf 1,40 m / ca. 8 jaar", url:"", emoji:"🏎️", desc:"Vol gas de kartbaan op en kijken wie het snelst is. Adrenaline gegarandeerd — en daarna heb je meteen iets om over te praten." },
+  { id:20,  name:"Solex tocht",  type:"Tours & ontdekking",  cats:["avontuurlijk"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"Vanaf 16 jaar (bromfietsleeftijd)", url:"https://www.outdoor-eindhoven.nl/activiteiten/outdoor-activiteiten/solex-tocht-rijden", emoji:"🛵", desc:"Rondrijden door Eindhoven en omgeving op een retro-brommer. Nostalgisch, grappig en je ziet de regio op een volledig andere manier." },
+  { id:21,  name:"E-chopper tour",  type:"Tours & ontdekking",  cats:["avontuurlijk"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"Vanaf 16 jaar (rijbewijs AM)", url:"https://www.e-chopperhuren.nl/route-eindhoven-rondje-eindhoven/", emoji:"🛺", desc:"Met een elektrische chopper door Eindhoven en omgeving. Ontspannen, bijzonder en je ziet de stad helemaal anders." },
+  { id:96,  name:"Street art tour (urban ontdekking)",  type:"Tours & ontdekking",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen leeftijdsgrens", url:"https://www.thisiseindhoven.com/nl/zien-en-doen/tours/street-art-tour", emoji:"🎨", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:97,  name:"Food tour met meerdere stops",  type:"Tours & ontdekking",  cats:["avontuurlijk"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"Vanaf 18 jaar (i.v.m. drankjes)", url:"https://sipsandsteps.com/nl", emoji:"🍽️", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:22,  name:"Urban Sport (Skaten, BMX)",  type:"Urban sports",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"beide", age:"Geen leeftijdsgrens", url:"https://www.area51eindhoven.nl/", emoji:"🛹", desc:"Skaten, BMX en meer bij Area51 Eindhoven. Actief, creatief en een beetje roekeloos — net zoals het hoort." },
+  { id:98,  name:"Freerun / parkour sessie",  type:"Urban sports",  cats:["avontuurlijk"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"binnen", age:"Vanaf 6 jaar", url:"https://commitfreerun.nl/", emoji:"🏃", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:26,  name:"Ragerooms",  type:"Unieke ervaringen",  cats:["avontuurlijk","uniek"], price:"40+", dur:"max 1 uur",   lvl:"hoog", loc:"binnen", age:"Vanaf 16 jaar", url:"", emoji:"💥", desc:"Spullen kapotsmijten in een beveiligde ruimte. Catharsis, adrenaline en daarna heerlijk ontspannen." },
+  { id:99,  name:"Dark dining experience (eten in het donker)",  type:"Unieke ervaringen",  cats:["avontuurlijk"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Vanaf 18 jaar", url:"https://www.dinnerinmotion.nl/", emoji:"🍽️", desc:"Een avontuurlijke activiteit voor twee — vol spanning en onvergetelijke momenten samen in Eindhoven." },
+  { id:27,  name:"Dierenshow",  type:"Cultuur & beleving",  cats:["avontuurlijk"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen leeftijdsgrens", url:"https://falconcrest.eu/", emoji:"🦅", desc:"Een spectaculaire valkeniershow bij Falconcrest buiten Eindhoven. Bijzonder en indrukwekkend — dit vergeet je niet." },
+  { id:52,  name:"Museum",  type:"Cultuur & beleving",  cats:["avontuurlijk","ontspannend"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"Geen leeftijdsgrens", url:"https://www.dafmuseum.nl/", emoji:"🏛️", desc:"Eindhoven heeft bijzondere musea zoals het DAF Museum. Samen rondlopen, dingen ontdekken en erover praten." },
+  { id:32,  name:"Paint & Sip",  type:"Schilderen & beeldende kunst",  cats:["creatief","ontspannend","romantisch","sociaal"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://www.rembrandtvanwine.nl/nl/sip-en-paint-eindhoven/", emoji:"🖌️", desc:"Schilder een kunstwerk met begeleiding terwijl je geniet van een drankje. Ontspannen, creatief en onverwacht gezellig." },
+  { id:34,  name:"Samen schilderen",  type:"Schilderen & beeldende kunst",  cats:["creatief","intiem","ontspannend","romantisch"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://penelopevanderwerf.nl/", emoji:"🖼️", desc:"Samen een canvas vastgrijpen en iets moois maken. Geen talent nodig — het gaat om het plezier en het moment." },
+  { id:33,  name:"Workshop schilderen",  type:"Schilderen & beeldende kunst",  cats:["creatief"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://sipandmake.nl/#workshop-title", emoji:"🎨", desc:"Leer schilderen in een professionele workshop. Samen creëren, fouten maken en er om lachen." },
+  { id:35,  name:"Keramiek workshop",  type:"Ambacht & handwerk",  cats:["creatief"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://www.kleicafe.nl/workshops-specials", emoji:"🏺", desc:"Klei, draaischijf en twee paar handen. Je maakt zelf iets om mee naar huis te nemen. Perfect voor een rustige, creatieve date." },
+  { id:36,  name:"Sieraden maken",  type:"Ambacht & handwerk",  cats:["creatief"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://workshop.do-collection.nl/", emoji:"💎", desc:"Maak samen een sieraad dat je aan de ander kunt geven. Persoonlijk, creatief en een mooie herinnering." },
+  { id:100,  name:"Resin art workshop (epoxy kunst)",  type:"Ambacht & handwerk",  cats:["creatief"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"16+", url:"https://epoxyworkshop.nl/workshop-masterclass-epoxy", emoji:"🎨", desc:"Samen creatief bezig zijn in een ontspannen sfeer. Lekker loskomen en iets moois maken met zijn tweeën." },
+  { id:38,  name:"Bloemschikken workshop",  type:"Bloemen & lifestyle",  cats:["creatief"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://sandraluz.nl/nl/workshops-calendar", emoji:"🌸", desc:"Leer samen bloemen schikken in een professionele workshop. Kleurrijk, rustgevend en je gaat naar huis met iets moois." },
+  { id:39,  name:"Workshop fotografie",  type:"Fotografie & content",  cats:["creatief"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://fotografiecursuseindhoven.nl/aanbod/basiscursus/", emoji:"📷", desc:"Leer samen fotograferen. Kijk door elkaars ogen, ontdek de stad anders en ga naar huis met mooie foto's." },
+  { id:101,  name:"Street art tour + graffiti workshop",  type:"Street art & urban",  cats:["creatief"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://www.graffitifun.nl/graffiti-workshops/", emoji:"🎨", desc:"Samen creatief bezig zijn in een ontspannen sfeer. Lekker loskomen en iets moois maken met zijn tweeën." },
+  { id:102,  name:"Workshop Blockprinten",  type:"Ambacht & handwerk",  cats:["creatief"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"16+", url:"", emoji:"🎨", desc:"Samen creatief bezig zijn in een ontspannen sfeer. Lekker loskomen en iets moois maken met zijn tweeën." },
+  { id:103,  name:"Workshop Feng Shui",  type:"Ambacht & handwerk",  cats:["creatief"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"16+", url:"", emoji:"🎨", desc:"Samen creatief bezig zijn in een ontspannen sfeer. Lekker loskomen en iets moois maken met zijn tweeën." },
+  { id:104,  name:"Workshop Naaldvilten",  type:"Ambacht & handwerk",  cats:["creatief"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"16+", url:"", emoji:"🎨", desc:"Samen creatief bezig zijn in een ontspannen sfeer. Lekker loskomen en iets moois maken met zijn tweeën." },
+  { id:72,  name:"Cocktail workshop",  type:"Drinks & borrel",  cats:["romantisch"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"18+", url:"https://the-blackcat.nl/", emoji:"🍹", desc:"Samen cocktails leren maken onder begeleiding van een barman. Proeven, mixen en lachen — en daarna drink je wat je zelf gemaakt hebt." },
+  { id:73,  name:"Wijnproeverij",  type:"Drinks & borrel",  cats:["romantisch"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://www.la-casera.nl/", emoji:"🍷", desc:"Verschillende wijnen proeven en vergelijken. Ontspannen, lekker en altijd iets nieuws te ontdekken over smaak en gevoel." },
+  { id:46,  name:"Wandeling in het park",  type:"Wandelen & buiten",  cats:["intiem","ontspannend","romantisch"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Alle leeftijden", url:"https://www.wandelzoekpagina.nl/wandeling/parkstadpad/16105/", emoji:"🌿", desc:"Een rustige wandeling door een van de mooiste parken van Eindhoven. Frisse lucht, natuur en ruimte voor een goed gesprek." },
+  { id:105,  name:"Natuurwandeling (Genneper Parken / bosgebied)",  type:"Wandelen & buiten",  cats:["ontspannend","romantisch"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Alle leeftijden", url:"", emoji:"🌿", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:48,  name:"Picknick in het park",  type:"Picknick & ontspannen",  cats:["ontspannend","romantisch"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Alle leeftijden", url:"https://indebuurt.nl/eindhoven/genieten-van/perfecte-spot-5-x-leuke-picknickplekken-in-eindhoven~116911/", emoji:"🧺", desc:"Kleedje, lekker eten en goed gezelschap in het park. Soms zijn de simpelste dingen het mooist." },
+  { id:50,  name:"Massage (duo)",  type:"Wellness & ontspanning",  cats:["intiem","ontspannend","romantisch"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://www.touchandbalance.nl/massagepraktijk/duo-massage/", emoji:"💆", desc:"Een duo-massage bij een professioneel massagepraktijk. Ontspannen samen — en daarna voel je je allebei als herboren." },
+  { id:106,  name:"Buitenbioscoop (seizoensgebonden)",  type:"Film & entertainment",  cats:["romantisch"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"", emoji:"🌿", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:107,  name:"Keramiek workshop (duo setting)",  type:"Creatief & samen maken",  cats:["romantisch"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"", emoji:"🎨", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:108,  name:"Bootje huren (samen varen)",  type:"Water & sfeer",  cats:["romantisch"], price:"15-40", dur:"2+ uur",   lvl:"middel", loc:"beide", age:"Alle leeftijden", url:"", emoji:"⛵", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:109,  name:"Bordspel café",  type:"Spel & luchtig",  cats:["ontspannend","romantisch","sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"Alle leeftijden", url:"", emoji:"🎲", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:110,  name:"Sterren kijken (donkere plek / buitengebied)",  type:"Unieke romantische ervaring",  cats:["romantisch"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Vrijdagavond (zie agenda)", url:"", emoji:"✨", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:111,  name:"Dark dining (eten in het donker)",  type:"Unieke romantische ervaring",  cats:["romantisch"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"", emoji:"🍽️", desc:"Een romantisch uitje dat jullie dichter bij elkaar brengt. Perfect voor een bijzonder moment samen." },
+  { id:112,  name:"Koffie workshop",  type:"Koffie & rustig zitten",  cats:["ontspannend"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"Alle leeftijden", url:"https://coffeeexperiences.nl/", emoji:"☕", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:113,  name:"Rondje Karpendonkse Plas",  type:"Wandelen & buiten",  cats:["ontspannend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen", url:"", emoji:"🌿", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:114,  name:"Wandeling Landgoed de Wielewaal",  type:"Wandelen & buiten",  cats:["ontspannend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen", url:"https://www.thisiseindhoven.com/nl/locaties/landgoed-de-wielewaal?gad_source=1&gad_campaignid=20544910468&gbraid=0AAAAAC4lRgLd3ewUaa3rA_qsywtkt8Cv7&gclid=Cj0KCQjw77bPBhC_ARIsAGAjjV9ZzT8WmDh6j1JQRMs_p3fNqosp8ZGWEDV4R4toXBPLYRDXgZYNpAIaAt6WEALw_wcB", emoji:"🌿", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:51,  name:"Bioscoop",  type:"Film & kijken",  cats:["ontspannend"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen", url:"https://www.pathe.nl/nl/bioscopen/pathe-eindhoven", emoji:"🎬", desc:"Een goede film samen in een comfortabele zaal. Klassiek, laagdrempelig en altijd een goed excuus om dicht bij elkaar te zitten." },
+  { id:115,  name:"Filmhuis / arthouse cinema",  type:"Film & kijken",  cats:["ontspannend"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen", url:"", emoji:"🎬", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:81,  name:"Galerie bezoeken",  type:"Cultuur & rustig beleven",  cats:["ontspannend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen", url:"https://vanabbemuseum.nl/", emoji:"🖼️", desc:"Rustig door een galerie of kunstmuseum lopen en samen reageren op wat je ziet. Laagdrempelig en verrassend verbindend." },
+  { id:116,  name:"Bootje huren (rustig varen)",  type:"Water & rustig",  cats:["ontspannend"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"21+ (meestal min. leeftijd verhuurder)", url:"", emoji:"⛵", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:10,  name:"Zwemmen",  type:"Water & rustig",  cats:["ontspannend"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"Alle leeftijden (vanaf 4 jr regulier tarief)", url:"https://www.tongelreep.nl/", emoji:"🏊", desc:"Baantjes trekken, spelen en ontspannen in het zwembad. Laagdrempelig en altijd verfrissend." },
+  { id:117,  name:"Dierenpark / kinderboerderij",  type:"Dieren & natuur",  cats:["ontspannend"], price:"15-40", dur:"2+ uur",   lvl:"middel", loc:"buiten", age:"Geen", url:"", emoji:"🦙", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:118,  name:"Sound healing / meditatie sessie",  type:"Unieke ontspanning",  cats:["ontspannend","uniek"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen", url:"", emoji:"🧘", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:119,  name:"Yoga les (duo / beginner)",  type:"Unieke ontspanning",  cats:["ontspannend"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Geen", url:"", emoji:"🧘", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:120,  name:"Ademhaling / relax workshop",  type:"Unieke ontspanning",  cats:["ontspannend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen", url:"", emoji:"🧘", desc:"Helemaal tot rust komen samen. Geen haast, geen stress — gewoon genieten van elkaars gezelschap." },
+  { id:54,  name:"Cocktailbar",  type:"Drinks & uitgaan",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://the-blackcat.nl/", emoji:"🍸", desc:"Een goed cocktailglas in een sfeervolle bar. De sfeer doet het werk — jij hoeft alleen maar te genieten." },
+  { id:55,  name:"Wijnbar",  type:"Drinks & uitgaan",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://www.la-casera.nl/", emoji:"🍷", desc:"Wijn proeven in een rustige, intieme omgeving. Ontspannen, lekker en een mooie manier om iets nieuws samen te ontdekken." },
+  { id:121,  name:"Bierproeverij en rondleiding",  type:"Drinks & uitgaan",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://www.rabauw.org/rondleiding-proeverij/", emoji:"🍺", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:122,  name:"Foodhall bezoek",  type:"Eten & samen",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🍽️", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:123,  name:"Streetfood avond",  type:"Eten & samen",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🍽️", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:23,  name:"Bowlen",  type:"Spellen & fun",  cats:["competitief","sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://www.vierhoogeindhoven.nl/bowlen", emoji:"🎳", desc:"Klassieker die altijd werkt. Relaxed, laagdrempelig en met een kleine weddenschap ineens heel spannend." },
+  { id:24,  name:"Jeu des Boules",  type:"Spellen & fun",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://mooieboules.nl/eindhoven/", emoji:"⚪", desc:"Een rustiek spel in een gezellige omgeving. Ontspannen, licht competitief en het liefst met een goed drankje erbij." },
+  { id:13,  name:"Poolen",  type:"Spellen & fun",  cats:["competitief","sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+ (na 18u)", url:"https://www.the-rex.nl/", emoji:"🎱", desc:"Biljart in een gezellige bar of snookerhal. Relaxed, licht competitief en perfect voor een goed gesprek tussendoor." },
+  { id:70,  name:"Shuffleboard",  type:"Spellen & fun",  cats:["competitief","sociaal"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://allineindhoven.nl/en/portfolio/shuffleboard/", emoji:"🎯", desc:"Schijfjes over een lange houten baan schuiven en de tegenstander uitspelen. Simpel te leren, moeilijk te meesteren." },
+  { id:124,  name:"Arcade hal",  type:"Spellen & fun",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Onder 14j onder begeleiding", url:"", emoji:"🕹️", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:125,  name:"Multiplayer VR experience",  type:"Gaming & interactie",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Vanaf 8 jaar", url:"", emoji:"🥽", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:84,  name:"Pubquiz",  type:"Team challenges",  cats:["competitief","sociaal"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://stroomhuis.nl/", emoji:"🧠", desc:"Samen in een pubquiz — test jullie kennis en bluf als je het niet weet. Altijd gezellig, altijd te weinig goede antwoorden." },
+  { id:126,  name:"Fotografie workshop",  type:"Creatief & sociaal",  cats:["sociaal"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://fotografiecursuseindhoven.nl/aanbod/basiscursus/", emoji:"🎨", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:127,  name:"Live muziek (café / podium)",  type:"Muziek & sfeer",  cats:["sociaal"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+ (na 22u)", url:"", emoji:"🎵", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:128,  name:"Workshop DJ'en",  type:"Muziek & sfeer",  cats:["sociaal"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🎵", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:11,  name:"Padellen",  type:"Sportief & samen",  cats:["competitief","sociaal"], price:"0-15", dur:"1-2 uur",   lvl:"hoog", loc:"beide", age:"Geen leeftijdsgrens", url:"", emoji:"🏓", desc:"Padel is makkelijker te leren dan tennis maar minstens zo leuk. Actief, speels en een goede manier om samen te lachen." },
+  { id:129,  name:"Feel good market (elke 3e zondag van de maand in de zomer)",  type:"Cultuur & rustig beleven",  cats:["sociaal"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen", url:"", emoji:"✨", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:130,  name:"Food tour (meerdere stops)",  type:"Buiten & ontdekken",  cats:["sociaal"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"18+ (i.v.m. drankjes)", url:"", emoji:"🍽️", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:75,  name:"High tea",  type:"Koffie & zoet",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"https://www.pullmanhotels.com/nl/hotel-eindhoven", emoji:"🫖", desc:"Geniet samen van een uitgebreide high tea met sandwiches, scones en zoetjes. Verwennerij, rust en aandacht voor elkaar." },
+  { id:131,  name:"Dessert bar / sweet tasting",  type:"Koffie & zoet",  cats:["sociaal"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Alle leeftijden", url:"", emoji:"☕", desc:"Gezellig samen iets ondernemen in Eindhoven. Goed voor een lach en mooie herinneringen." },
+  { id:132,  name:"Thuis dineren (samen koken of bestellen)",  type:"Dineren & privé",  cats:["intiem"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🍽️", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:133,  name:"Wijnbar (rustige setting)",  type:"Drinks & rustig",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🍷", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:134,  name:"Cocktailbar (lage drukte / avondsetting)",  type:"Drinks & rustig",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🍹", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:135,  name:"Koffietentje (rustige plek)",  type:"Koffie & 1-op-1",  cats:["intiem"], price:"0-15", dur:"max 1 uur",   lvl:"laag", loc:"beide", age:"Geen leeftijdsgrens", url:"", emoji:"☕", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:136,  name:"Specialty coffee bar (stil / knus)",  type:"Koffie & 1-op-1",  cats:["intiem"], price:"0-15", dur:"max 1 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"☕", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:137,  name:"Theehuis (ontspannen setting)",  type:"Koffie & 1-op-1",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🛁", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:138,  name:"Natuurwandeling (rustige omgeving)",  type:"Wandelen & gesprek",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Geen leeftijdsgrens", url:"", emoji:"🌿", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:139,  name:"Avondwandeling (weinig mensen)",  type:"Wandelen & gesprek",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Geen leeftijdsgrens", url:"", emoji:"🌿", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:140,  name:"Paint & Sip (rustige setting)",  type:"Creatief & samen",  cats:["intiem"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://www.rembrandtvanwine.nl/nl/sip-en-paint-eindhoven/", emoji:"🎨", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:141,  name:"Keramiek workshop (kleine groep / duo)",  type:"Creatief & samen",  cats:["intiem"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🎨", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:142,  name:"Schrijfworkshop (persoonlijk / verdiepend)",  type:"Creatief & samen",  cats:["intiem"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+ (volwassenencursus)", url:"", emoji:"🎨", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:143,  name:"Sauna / wellness (rustige momenten)",  type:"Wellness & samen",  cats:["intiem"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🛁", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:144,  name:"Privé spa / wellness ruimte",  type:"Wellness & samen",  cats:["intiem"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🛁", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:145,  name:"Bioscoop (rustige zaal / late voorstelling)",  type:"Film & samen",  cats:["intiem"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Afhankelijk van film (kijkwijzer)", url:"", emoji:"🎬", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:146,  name:"Filmavond thuis (bank + snacks)",  type:"Film & samen",  cats:["intiem"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"", emoji:"🎬", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:147,  name:"Filmhuis (kleinschalig / rustig)",  type:"Film & samen",  cats:["intiem"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Afhankelijk van film", url:"", emoji:"🎬", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:148,  name:"Wandeling langs het water",  type:"Water & rust",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Geen leeftijdsgrens", url:"", emoji:"🌿", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:149,  name:"Boswandeling (regio Eindhoven)",  type:"Natuur & stilte",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Geen leeftijdsgrens", url:"", emoji:"🌿", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:150,  name:"Sterren kijken (donkere plek)",  type:"Natuur & stilte",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen leeftijdsgrens", url:"https://www.sterrenwachteindhoven.nl/", emoji:"✨", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:151,  name:"Picknick op rustige plek",  type:"Natuur & stilte",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Geen leeftijdsgrens", url:"", emoji:"🧺", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:152,  name:"Diepgaand vragenspel (bijv. kaartenspel)",  type:"Gesprek & verdieping",  cats:["intiem"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🥽", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:153,  name:"Coaching / reflectie workshop (light)",  type:"Gesprek & verdieping",  cats:["intiem"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🎨", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:154,  name:"Hotelovernachting (boutique / bijzonder)",  type:"Unieke intieme ervaring",  cats:["intiem"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🏨", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:155,  name:"Muziek luisteren (vinyl bar / rustige setting)",  type:"Unieke intieme ervaring",  cats:["intiem"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens (winkel)", url:"", emoji:"🎵", desc:"Een rustig en persoonlijk moment voor jullie tweeën — zonder afleidingen, vol verbinding." },
+  { id:156,  name:"De Lichttoren – Private Dining Eindhoven",  type:"🍽️ Private Dining",  cats:["verbindend"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://delichttoren.nl/besloten-groep-in-de-lichtkamer", emoji:"🍽️", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:157,  name:"VANE Restaurant & Skybar – Private Area",  type:"🍽️ Private Dining",  cats:["verbindend"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.vane-eindhoven.nl", emoji:"🍽️", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:158,  name:"OST Restaurant + Wijnbar – Private Dining",  type:"🍽️ Private Dining",  cats:["verbindend"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://osteindhoven.nl", emoji:"🍷", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:159,  name:"L'Avenue Vin & Cuisine – Wijnbar Kleine Berg",  type:"🍷 Wijnbar",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.lavenue-eindhoven.nl", emoji:"🍷", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:160,  name:"OST Restaurant + Wijnbar Eindhoven",  type:"🍷 Wijnbar",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://osteindhoven.nl", emoji:"🍷", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:161,  name:"VANE Skybar Eindhoven",  type:"🍸 Cocktailbar",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.vane-eindhoven.nl/skybar", emoji:"🍹", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:162,  name:"Thomas | Cocktails & Kitchen Eindhoven",  type:"🍸 Cocktailbar",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://thomaseindhoven.nl", emoji:"🍹", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:163,  name:"ZwartWit Koffie – Victoriapark Eindhoven",  type:"☕ Specialty Coffee Bar",  cats:["verbindend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.zwartwitkoffie.nl", emoji:"☕", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:164,  name:"Sprout Coffee Roasters Eindhoven",  type:"☕ Specialty Coffee Bar",  cats:["verbindend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://sproutcoffeeroasters.art", emoji:"☕", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:165,  name:"Stadsbranderij Eindhoven",  type:"☕ Specialty Coffee Bar",  cats:["verbindend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Vr–zo open (zie website voor actuele tijden)", url:"https://www.stadsbranderij.nl", emoji:"☕", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:166,  name:"Rembrandt van Wine – Sip & Paint in the Dark Eindhoven",  type:"🎨 Paint & Sip",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.rembrandtvanwine.nl/sip-en-paint-eindhoven", emoji:"🍷", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:167,  name:"Sip and Make – Creatieve workshops Strijp-S",  type:"🎨 Paint & Sip",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Wisselend; zie website voor agenda", url:"https://sipandmake.nl", emoji:"🎨", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:168,  name:"Clay Atelier Eindhoven – Keramiek schilderen",  type:"🏺 Keramiek Workshop",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.clayateliereindhoven.nl", emoji:"🎨", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:169,  name:"NOMO Ceramics – Pottenbakken Eindhoven",  type:"🏺 Keramiek Workshop",  cats:["verbindend"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://pottenbakkeneindhoven.nl", emoji:"🎨", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:170,  name:"Bevrijdend Schrijven – Schrijfcafé Eindhoven",  type:"✍️ Schrijfworkshop",  cats:["verbindend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Iedere donderdag 09:30–11:30", url:"https://bevrijdendschrijven.nl/schrijfcafe", emoji:"🎨", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:171,  name:"Relax Massage Eindhoven – Duo Massage",  type:"💆 Duo Massage",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://relaxmassageeindhoven.nl/duo-massage-eindhoven", emoji:"💆", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:172,  name:"Thai Yoga Massage Eindhoven – Duo",  type:"💆 Duo Massage",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://thai-yoga.nl", emoji:"🧘", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:173,  name:"Spa040 – Privé Sauna Eindhoven",  type:"🧖 Privé Spa / Wellness",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.spa040.nl", emoji:"🛁", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:174,  name:"City Spa Eindhoven – Privé Sauna voor 2",  type:"🧖 Privé Spa / Wellness",  cats:["verbindend"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.cityspa-eindhoven.nl", emoji:"🛁", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:175,  name:"Hotel Mariënhage – Sauna & Spa (Boutique Kloosterhotel)",  type:"🧖 Privé Spa / Wellness",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.marienhage.com/services/spa-wellness", emoji:"🛁", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:176,  name:"Natlab – Filmhuis Eindhoven",  type:"🎬 Filmhuis",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Café: ma–do 10:30–23:15 | Vr–za 10:30–00:30 | Zo 10:30–22:15", url:"https://www.natlab.nl", emoji:"🎬", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:177,  name:"LAB-1 – Bioscoop & Club Eindhoven",  type:"🎬 Filmhuis",  cats:["verbindend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.lab-1.nl", emoji:"🎬", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:178,  name:"Kano Verhuur Eindhoven – Dommel",  type:"⛵ Bootje Huren / Varen",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"Alle leeftijden", url:"https://www.kanoverhuureindhoven.nl", emoji:"🛶", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:179,  name:"Happy Canoe – Kanotocht Dommel Eindhoven",  type:"⛵ Bootje Huren / Varen",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"Alle leeftijden", url:"https://www.happycanoe.nl", emoji:"🛶", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:180,  name:"Dinner in Motion – 360° Immersive Dining Eindhoven",  type:"✨ Bijzonder / Immersief Diner",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.dinnerinmotion.nl", emoji:"🍽️", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:181,  name:"Hotel Mariënhage – Boutique Kloosterhotel Eindhoven",  type:"🏨 Boutique Hotel Overnachting",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://www.marienhage.com", emoji:"🏨", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:182,  name:"Boutique Hotel Lumière Eindhoven",  type:"🏨 Boutique Hotel Overnachting",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://hotellumiere.nl", emoji:"🏨", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:183,  name:"De Platenzaak Eindhoven – Vinyl & More",  type:"🎵 Vinyl / Muziek Luisteren",  cats:["verbindend"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://deplatenzaak.com", emoji:"🎵", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:184,  name:"Paradijsvogels Relatiecoaching Eindhoven",  type:"🧭 1-op-1 Reflectie / Relatiecoaching",  cats:["verbindend"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Alle leeftijden", url:"https://paradijsvogels-relatiecoaching.nl", emoji:"💬", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:185,  name:"DIEP'R Kaartspel – Editie Relatie (te koop in Eindhoven)",  type:"🃏 Diepgaand Vragenspel",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Online 24/7 beschikbaar; winkel zie openingstijden", url:"https://www.diepr.nl", emoji:"🥽", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:186,  name:"Vertellis Powerkoppel Deck (te koop bij Bruna Eindhoven)",  type:"🃏 Diepgaand Vragenspel",  cats:["verbindend"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"beide", age:"Online 24/7; zie winkel", url:"https://vertellis.nl/products/het-powerkoppel-deck", emoji:"🥽", desc:"Een activiteit die jullie samen dichter bij elkaar brengt. Perfect om de band te versterken." },
+  { id:12,  name:"Tennissen",  type:"Racket & Balsport",  cats:["competitief"], price:"40+", dur:"max 1 uur",   lvl:"hoog", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://www.eindhovensport.nl", emoji:"🎾", desc:"Een potje tennis. Simpel, klassiek en altijd leuk — ook als je er niet zo goed in bent." },
+  { id:187,  name:"Tafeltennis (pingpong bar / buiten)",  type:"Racket & Balsport",  cats:["competitief"], price:"0-15", dur:"1-2 uur",   lvl:"middel", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://www.ttvflash.nl", emoji:"🎾", desc:"Lekker strijden met elkaar — wie wint? Een uitdagend uitje met een gezonde dosis competitie." },
+  { id:188,  name:"Multiplayer VR battle",  type:"VR & Gaming",  cats:["competitief"], price:"40+", dur:"max 1 uur",   lvl:"middel", loc:"binnen", age:"Zie website", url:"", emoji:"🥽", desc:"Lekker strijden met elkaar — wie wint? Een uitdagend uitje met een gezonde dosis competitie." },
+  { id:189,  name:"Racing simulators",  type:"VR & Gaming",  cats:["competitief"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://www.racesquare.com", emoji:"🥽", desc:"Lekker strijden met elkaar — wie wint? Een uitdagend uitje met een gezonde dosis competitie." },
+  { id:29,  name:"Paintballen",  type:"Actie & Combat",  cats:["competitief"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"buiten", age:"Jongeren/volwassenen (zie website)", url:"", emoji:"💣", desc:"Buiten rennen, schuilgaan en jagen. Paintball is actief, spannend en zorgt voor gegarandeerde verhalen achteraf." },
+  { id:30,  name:"Archery tag",  type:"Actie & Combat",  cats:["competitief"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"buiten", age:"Zie website", url:"https://www.outdoor-eindhoven.nl", emoji:"🏹", desc:"Boogschieten met schuimpijlen in een sportarena. Snel, actief en competitief — voor als je écht wil winnen." },
+  { id:41,  name:"Verraders activiteit",  type:"Escaperooms & Citygames",  cats:["competitief"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"Geen leeftijdsgrens", url:"https://www.wieisdeverrader.nl", emoji:"🎭", desc:"Een interactieve rollenspel-ervaring waarbij niemand te vertrouwen is. Spanningsvol, grappig en onverwacht diepzinnig." },
+  { id:28,  name:"Parachute springen",  type:"Extreme & bijzondere ervaringen",  cats:["uniek"], price:"40+", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"12+", url:"https://www.enpc.nl/parachutespringen-eindhoven", emoji:"🪂", desc:"Uit een vliegtuig springen boven Eindhoven. De ultieme adrenalinekick — iets wat je nooit meer vergeet." },
+  { id:190,  name:"Horror experience / scare event",  type:"Extreme & bijzondere ervaringen",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"n.v.t.", url:"", emoji:"👻", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:191,  name:"Blind tasting (wijn / bier / chocolade)",  type:"Ongewone eetervaringen",  cats:["uniek"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://dewijnles.nl/wijnproeverij-eindhoven/", emoji:"🍷", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:192,  name:"Amfibie rijden",  type:"Avontuurlijk & anders",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"16+ zelf rijden / 12+ meerijden", url:"https://www.outdoor-eindhoven.nl/activiteiten/gemotoriseerde-activiteiten/amfibie-rijden", emoji:"🚗", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:193,  name:"Quad rijden (offroad)",  type:"Avontuurlijk & anders",  cats:["uniek"], price:"40+", dur:"1-2 uur",   lvl:"hoog", loc:"buiten", age:"16+", url:"https://www.fundustry.nl/uitjes/quad-rijden/eindhoven/", emoji:"🏍️", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:61,  name:"Crosskarten",  type:"Avontuurlijk & anders",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"hoog", loc:"buiten", age:"16+", url:"https://www.outdoor-eindhoven.nl/activiteiten/gemotoriseerde-activiteiten/crosskarten", emoji:"🚗", desc:"Off-road karten over een ruig parcours. Modder, snelheid en puur plezier buiten." },
+  { id:37,  name:"Workshop goudsmeden",  type:"Creatief & anders",  cats:["uniek"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://www.atelieraroha.nl/sieraad-maken/", emoji:"✨", desc:"Maak samen een sieraad van echt goud of zilver bij Atelier Aroha. Bijzonder, persoonlijk en een blijvende herinnering." },
+  { id:194,  name:"Parfum workshop (eigen geur maken)",  type:"Creatief & anders",  cats:["uniek"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geen specifieke leeftijdsgrens", url:"https://www.glowessentialoils.nl/workshops/parfum-maken", emoji:"🎨", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:195,  name:"Tattoo workshop (fake / design)",  type:"Creatief & anders",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"n.v.t.", url:"", emoji:"🎨", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:196,  name:"Immersive experience (thema beleving)",  type:"Beleving & immersie",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"12+ (jonger onder begeleiding)", url:"https://www.neoseum.com/ / https://www.booking.com/attractions/nl/prth02jlcxkb-motion-imagination-experience-ticket.html", emoji:"🎭", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:197,  name:"Interactieve show / diner",  type:"Beleving & immersie",  cats:["uniek"], price:"40+", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"Geschikt voor volwassenen", url:"https://www.dinnerinmotion.nl/", emoji:"🍽️", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:198,  name:"Avondvaart met verlichting",  type:"Water & speciaal",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"beide", age:"n.v.t.", url:"", emoji:"⛵", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:199,  name:"SUP bij zonsondergang",  type:"Water & speciaal",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"middel", loc:"buiten", age:"Kinderen met zwemdiploma onder begeleiding", url:"https://www.eindjesuppen.nl/", emoji:"🏄", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:200,  name:"Dierenervaring (bijv. alpaca wandelen in regio)",  type:"Dieren & ervaring",  cats:["uniek"], price:"15-40", dur:"1-2 uur",   lvl:"laag", loc:"buiten", age:"Kinderen 3-12 jaar onder begeleiding", url:"https://www.alpacafarmriethoven.com/", emoji:"🌿", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:201,  name:"Floaten (sensory deprivation)",  type:"Rustig maar anders",  cats:["uniek"], price:"40+", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+ (jongeren met begeleiding)", url:"", emoji:"🛁", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:202,  name:"Stilte ervaring / mini retreat",  type:"Rustig maar anders",  cats:["uniek"], price:"0-15", dur:"1-2 uur",   lvl:"laag", loc:"binnen", age:"18+", url:"https://stiltevinden.nl/", emoji:"🌙", desc:"Een bijzondere ervaring die je niet snel vergeet. Iets heel anders dan anders, speciaal voor jullie tweeën." },
+  { id:203,  name:"Design / licht expositie (Eindhoven vibe)",  type:"Cultuur & rustig beleven",  cats:["evenementen"], price:"0-15", dur:"2+ uur",   lvl:"laag", loc:"buiten", age:"Geen", url:"", emoji:"💡", desc:"Een bijzonder evenement in Eindhoven — een leuke uitstap voor jullie tweeën." },
+  { id:57,  name:"Open Mic Night",  type:"Creatief & sociaal",  cats:["evenementen"], price:"15-40", dur:"2+ uur",   lvl:"laag", loc:"binnen", age:"18+", url:"", emoji:"🎤", desc:"Kijken (of zingen) bij een open mic-avond. Sfeer, muziek en verrassingen — je weet nooit wie er op staat." },
+]
+
+/* ═══════════════════════════════════════════════
+   QUESTION CONFIG
+═══════════════════════════════════════════════ */
+const Q1 = [
+  { v:"romantisch",  e:"🌹", l:"Romantisch",  s:"Sfeer, gevoel, samen genieten" },
+  { v:"avontuurlijk",e:"⚡", l:"Avontuurlijk", s:"Spanning, actie, buiten de comfortzone" },
+  { v:"ontspannend", e:"🌿", l:"Ontspannend",  s:"Rustig, geen stress, lekker lui" },
+  { v:"sociaal",     e:"🎉", l:"Sociaal",      s:"Energie, gezelligheid, interactie" },
+  { v:"intiem",      e:"✨", l:"Intiem",        s:"1-op-1, diepgang, rustige verbinding" },
+  { v:"verbindend",  e:"🤝", l:"Verbindend",   s:"Samenwerken, iets samen ondernemen" },
+  { v:"competitief", e:"🏆", l:"Competitief",  s:"Winnen, uitdagen, sportief" },
+  { v:"creatief",    e:"🎨", l:"Creatief",     s:"Maken, ontdekken, expressie" },
+  { v:"uniek",       e:"🌟", l:"Uniek",        s:"Anders, bijzonder, onverwacht" },
+];
+const Q2 = [
+  { v:"laag",   e:"🛋️", l:"Lekker rustig",   s:"Geen zweet, gewoon genieten" },
+  { v:"middel", e:"🚶", l:"Beetje actief",    s:"In beweging, maar niet uitgeput" },
+  { v:"hoog",   e:"🔥", l:"Vol energie",      s:"Actief, sportief, zweten mag" },
+];
+const Q3 = [
+  { v:"max 1 uur", e:"⏱️", l:"Max 1 uur",        s:"Snel en bondig" },
+  { v:"1-2 uur",   e:"⏰", l:"1 tot 2 uur",       s:"Lekker uitgebreid" },
+  { v:"2+ uur",    e:"🌅", l:"Meer dan 2 uur",    s:"Een echt dagdeel" },
+  { v:"any",       e:"🤷", l:"Maakt niet uit",    s:"Verras ons maar" },
+];
+const Q4 = [
+  { v:"0-15",  e:"💚", l:"Tot €15 p.p.",    s:"Budget-friendly" },
+  { v:"15-40", e:"💛", l:"€15 – €40 p.p.", s:"Gemiddeld" },
+  { v:"40+",   e:"💎", l:"€40+ p.p.",       s:"Geen limiet" },
+  { v:"any",   e:"🤷", l:"Maakt niet uit",  s:"Budget is geen thema" },
+];
+
+/* ═══════════════════════════════════════════════
+   FAVORIETEN  (localStorage)
+═══════════════════════════════════════════════ */
+const Favs = (() => {
+  const KEY = 'dateivety_favs';
+  let ids = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e) { return []; } })();
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch(e) {} }
+
+  return {
+    has(id)    { return ids.includes(id); },
+    toggle(id) {
+      ids = ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
+      save();
+    },
+    count()    { return ids.length; },
+    list()     { return ACTIVITIES.filter(a => ids.includes(a.id)); },
+  };
+})();
+
+/* ═══════════════════════════════════════════════
+   SUGGESTIES — pas dit e-mailadres aan naar jouw eigen adres
+═══════════════════════════════════════════════ */
+const SUGGEST_EMAIL = 'Dateivety@gmail.com';
+const PEXELS_KEY   = 'WtiQBPqNHCUmUSOZHJ36ZgEIUDCnGlFBlPdOqygYFaWHPD3ZmUVGDbt2';
+const imgCache     = {};
+
+/* ═══════════════════════════════════════════════
+   AFBEELDINGEN — Unsplash zoekwoorden per activiteit
+═══════════════════════════════════════════════ */
+const ACTIVITY_IMGS = {
+  1:"paddleboarding water",
+  2:"kayaking river",
+  3:"jet ski water",
+  4:"waterscooter lake",
+  5:"water skiing",
+  6:"wakeboarding",
+  91:"Bootje huren (zelf varen door Eindhoven)",
+  92:"Avond SUP tour (met verlichting / sunset)",
+  7:"bouldering climbing wall",
+  8:"rock climbing indoor",
+  9:"trampoline jumping",
+  93:"Bijlwerpen (axe throwing)",
+  14:"arcade game retro",
+  15:"virtual reality gaming",
+  67:"virtual reality headset",
+  16:"escape room puzzle",
+  17:"city adventure map",
+  94:"Outdoor escape tocht (door stad/bos)",
+  95:"GPS-speurtocht met opdrachten",
+  18:"laser combat dark",
+  19:"go kart racing",
+  20:"moped scooter tour",
+  21:"electric bike city",
+  96:"Street art tour (urban ontdekking)",
+  97:"Food tour met meerdere stops",
+  22:"skateboard bmx urban",
+  98:"Freerun / parkour sessie",
+  26:"smashing room",
+  99:"Dark dining experience (eten in het donker)",
+  27:"falcon bird show",
+  52:"museum art exhibition",
+  32:"paint sip wine art",
+  34:"canvas painting couple",
+  33:"painting workshop art",
+  35:"pottery ceramics clay",
+  36:"jewelry making craft",
+  100:"Resin art workshop (epoxy kunst)",
+  38:"flower arrangement",
+  39:"photography camera",
+  101:"Street art tour + graffiti workshop",
+  102:"Workshop Blockprinten",
+  103:"Workshop Feng Shui",
+  104:"Workshop Naaldvilten",
+  72:"cocktail making bar workshop",
+  73:"wine tasting glasses",
+  46:"park walking nature",
+  105:"Natuurwandeling (Genneper Parken / bosgebied)",
+  48:"picnic park blanket",
+  50:"couple massage relax",
+  106:"Buitenbioscoop (seizoensgebonden)",
+  107:"Keramiek workshop (duo setting)",
+  108:"Bootje huren (samen varen)",
+  109:"Bordspel café",
+  110:"Sterren kijken (donkere plek / buitengebied)",
+  111:"Dark dining (eten in het donker)",
+  112:"Koffie workshop",
+  113:"Rondje Karpendonkse Plas",
+  114:"Wandeling Landgoed de Wielewaal",
+  51:"cinema movie theater",
+  115:"Filmhuis / arthouse cinema",
+  81:"art gallery modern museum",
+  116:"Bootje huren (rustig varen)",
+  10:"swimming pool",
+  117:"Dierenpark / kinderboerderij",
+  118:"Sound healing / meditatie sessie",
+  119:"Yoga les (duo / beginner)",
+  120:"Ademhaling / relax workshop",
+  54:"cocktail bar drinks",
+  55:"wine bar intimate",
+  121:"Bierproeverij en rondleiding",
+  122:"Foodhall bezoek",
+  123:"Streetfood avond",
+  23:"bowling alley",
+  24:"petanque boules",
+  13:"billiards pool bar",
+  70:"shuffleboard game bar",
+  124:"Arcade hal",
+  125:"Multiplayer VR experience",
+  84:"pub quiz trivia night",
+  126:"Fotografie workshop",
+  127:"Live muziek (café / podium)",
+  128:"Workshop DJ'en",
+  11:"padel tennis court",
+  129:"Feel good market (elke 3e zondag van de maand in de zomer)",
+  130:"Food tour (meerdere stops)",
+  75:"afternoon tea scones",
+  131:"Dessert bar / sweet tasting",
+  132:"Thuis dineren (samen koken of bestellen)",
+  133:"Wijnbar (rustige setting)",
+  134:"Cocktailbar (lage drukte / avondsetting)",
+  135:"Koffietentje (rustige plek)",
+  136:"Specialty coffee bar (stil / knus)",
+  137:"Theehuis (ontspannen setting)",
+  138:"Natuurwandeling (rustige omgeving)",
+  139:"Avondwandeling (weinig mensen)",
+  140:"Paint & Sip (rustige setting)",
+  141:"Keramiek workshop (kleine groep / duo)",
+  142:"Schrijfworkshop (persoonlijk / verdiepend)",
+  143:"Sauna / wellness (rustige momenten)",
+  144:"Privé spa / wellness ruimte",
+  145:"Bioscoop (rustige zaal / late voorstelling)",
+  146:"Filmavond thuis (bank + snacks)",
+  147:"Filmhuis (kleinschalig / rustig)",
+  148:"Wandeling langs het water",
+  149:"Boswandeling (regio Eindhoven)",
+  150:"Sterren kijken (donkere plek)",
+  151:"Picknick op rustige plek",
+  152:"Diepgaand vragenspel (bijv. kaartenspel)",
+  153:"Coaching / reflectie workshop (light)",
+  154:"Hotelovernachting (boutique / bijzonder)",
+  155:"Muziek luisteren (vinyl bar / rustige setting)",
+  156:"De Lichttoren – Private Dining Eindhoven",
+  157:"VANE Restaurant & Skybar – Private Area",
+  158:"OST Restaurant + Wijnbar – Private Dining",
+  159:"L'Avenue Vin & Cuisine – Wijnbar Kleine Berg",
+  160:"OST Restaurant + Wijnbar Eindhoven",
+  161:"VANE Skybar Eindhoven",
+  162:"Thomas | Cocktails & Kitchen Eindhoven",
+  163:"ZwartWit Koffie – Victoriapark Eindhoven",
+  164:"Sprout Coffee Roasters Eindhoven",
+  165:"Stadsbranderij Eindhoven",
+  166:"Rembrandt van Wine – Sip & Paint in the Dark Eindhoven",
+  167:"Sip and Make – Creatieve workshops Strijp-S",
+  168:"Clay Atelier Eindhoven – Keramiek schilderen",
+  169:"NOMO Ceramics – Pottenbakken Eindhoven",
+  170:"Bevrijdend Schrijven – Schrijfcafé Eindhoven",
+  171:"Relax Massage Eindhoven – Duo Massage",
+  172:"Thai Yoga Massage Eindhoven – Duo",
+  173:"Spa040 – Privé Sauna Eindhoven",
+  174:"City Spa Eindhoven – Privé Sauna voor 2",
+  175:"Hotel Mariënhage – Sauna & Spa (Boutique Kloosterhotel)",
+  176:"Natlab – Filmhuis Eindhoven",
+  177:"LAB-1 – Bioscoop & Club Eindhoven",
+  178:"Kano Verhuur Eindhoven – Dommel",
+  179:"Happy Canoe – Kanotocht Dommel Eindhoven",
+  180:"Dinner in Motion – 360° Immersive Dining Eindhoven",
+  181:"Hotel Mariënhage – Boutique Kloosterhotel Eindhoven",
+  182:"Boutique Hotel Lumière Eindhoven",
+  183:"De Platenzaak Eindhoven – Vinyl & More",
+  184:"Paradijsvogels Relatiecoaching Eindhoven",
+  185:"DIEP'R Kaartspel – Editie Relatie (te koop in Eindhoven)",
+  186:"Vertellis Powerkoppel Deck (te koop bij Bruna Eindhoven)",
+  12:"tennis court",
+  187:"Tafeltennis (pingpong bar / buiten)",
+  188:"Multiplayer VR battle",
+  189:"Racing simulators",
+  29:"paintball outdoor",
+  30:"archery bow arrow",
+  41:"mystery game roleplay",
+  28:"skydiving parachute",
+  190:"Horror experience / scare event",
+  191:"Blind tasting (wijn / bier / chocolade)",
+  192:"Amfibie rijden",
+  193:"Quad rijden (offroad)",
+  61:"offroad kart racing",
+  37:"goldsmith jewelry",
+  194:"Parfum workshop (eigen geur maken)",
+  195:"Tattoo workshop (fake / design)",
+  196:"Immersive experience (thema beleving)",
+  197:"Interactieve show / diner",
+  198:"Avondvaart met verlichting",
+  199:"SUP bij zonsondergang",
+  200:"Dierenervaring (bijv. alpaca wandelen in regio)",
+  201:"Floaten (sensory deprivation)",
+  202:"Stilte ervaring / mini retreat",
+  203:"Design / licht expositie (Eindhoven vibe)",
+  57:"open mic music stage"
+};
+
+/* ═══════════════════════════════════════════════
+   LOCATIES PER ACTIVITEIT
+   Voeg hier nieuwe locaties toe (id = activiteit id)
+═══════════════════════════════════════════════ */
+const LOCATIONS = {
+  1: [ // Suppen
+    { name: "Dommel (stadscentrum)", tip: "Start bij de Dommelstraat — rustig water, mooie groene omgeving." },
+    { name: "Wilhelminakanaal (Oirschot)", tip: "Breed kanaal, ideaal voor beginners en goed bereikbaar vanuit Eindhoven." },
+  ],
+  2: [ // Kanoën
+    { name: "Dommel (Genneper Parken)", tip: "Verhuur mogelijk bij de recreatieplassen, mooi natuur rondom." },
+    { name: "Beuven (Strabrechtse Heide)", tip: "±30 min rijden maar de moeite waard — prachtig natuurgebied." },
+  ],
+  3: [ // Jetskiën
+    { name: "Mudfactory (Kaatsheuvel)", tip: "±35 min van Eindhoven — boek vooraf via de website.", url: "https://mudfactory.nl/jetskien/" },
+  ],
+  7: [ // Klimmen / Boulderen
+    { name: "Boulder Neoliet (Woensel)", tip: "Grootste indoor klimhal van Eindhoven — ook geschikt voor beginners.", url: "https://boulderneoliet.nl" },
+  ],
+  9: [ // Trampolinepark
+    { name: "Jump XL Eindhoven", tip: "Grote trampolinehal met verschillende zones — reserveer online voor minder wachttijd.", url: "https://www.jumpxl.nl/vestigingen/eindhoven/" },
+  ],
+  10: [ // Zwemmen
+    { name: "Tongelreep (Eindhoven)", tip: "Groot zwemcomplex met buitenbad in de zomer — populair dus vroeg gaan.", url: "https://www.tongelreep.nl" },
+    { name: "Pieter Vreedebad (centrum)", tip: "Centraal gelegen zwembad, goed bereikbaar met openbaar vervoer." },
+  ],
+  11: [ // Padellen
+    { name: "Padel Eindhoven Noord", tip: "Meerdere banen, ook avondtijden beschikbaar." },
+    { name: "Sportcomplex Aalst", tip: "Banen buiten en binnen — check beschikbaarheid online en boek vooraf." },
+  ],
+  13: [ // Biljart / Poolen
+    { name: "The Rex (centrum)", tip: "Trendy biljartzaal in het centrum — bier erbij en je hebt een perfecte avond.", url: "https://the-rex.nl" },
+  ],
+  15: [ // VR Gaming
+    { name: "The Park Playground (Strijp-S)", tip: "Groot VR-complex met meerdere ervaringen — boek vooraf online.", url: "https://theparkplayground.com" },
+  ],
+  16: [ // Escaperooms
+    { name: "Escape Room Eindhoven (centrum)", tip: "Meerdere thema's beschikbaar — ideaal voor 2 personen.", url: "https://escaperoom-eindhoven.nl" },
+    { name: "Clue Adventures Eindhoven", tip: "Goede beoordelingen — vraag naar de moeilijkheidsgraad van tevoren." },
+    { name: "Hint Escape (centrum)", tip: "Onderdompeling in een verhaal — ga met een open houding." },
+  ],
+  17: [ // Stadsspel / Citygame
+    { name: "Stadscentrum (18 Septemberplein)", tip: "De meeste stadsspelen starten hier — goed bereikbaar en veel te zien." },
+    { name: "Strijp-S", tip: "Creatieve wijk met veel te ontdekken — ook buiten de gebaande paden." },
+  ],
+  18: [ // iCombat
+    { name: "iCombat Eindhoven", tip: "Outdoor laser combat — kijk op de website voor reservering en beschikbaarheid.", url: "https://lqehv.nl" },
+  ],
+  19: [ // Go-karten
+    { name: "Karting Eindhoven (Woensel)", tip: "Overdekte kartbaan — ook leuk als het regent." },
+    { name: "Karting Helmond (±20 min)", tip: "Grotere baan met hogere snelheden — aanrader voor echte racefans." },
+  ],
+  20: [ // Solex tocht
+    { name: "Outdoor Eindhoven (centrum)", tip: "Vertrekt vanuit het centrum — inclusief routebegeleiding.", url: "https://outdoor-eindhoven.nl" },
+  ],
+  21: [ // E-chopper tour
+    { name: "E-Chopper Huren (centrum)", tip: "Ophalen in het centrum, rijd op eigen tempo door de stad en omgeving.", url: "https://e-chopperhuren.nl" },
+  ],
+  22: [ // Urban Sport / Skateboard BMX
+    { name: "Area 51 (Strijp-S)", tip: "Indoor skatepark in de creatieve wijk Strijp-S — ook voor beginners.", url: "https://area51eindhoven.nl" },
+    { name: "Skatepark Woensel (buiten)", tip: "Gratis outdoor skatepark — populair op zomerse middagen." },
+  ],
+  23: [ // Bowlen
+    { name: "Vier Hoog Eindhoven (centrum)", tip: "Bowlingbanen op de vierde verdieping — ook cocktails beschikbaar.", url: "https://vierhoogeindhoven.nl" },
+  ],
+  24: [ // Jeu de Boules
+    { name: "Mooie Boules Eindhoven", tip: "Gezellige jeu-de-boulesplek met drankjes erbij — reserveren aanbevolen.", url: "https://mooieboules.nl" },
+    { name: "Genneper Parken (buiten)", tip: "Informeel buiten spelen in het park — neem je eigen ballen mee." },
+  ],
+  25: [ // GlowGolf
+    { name: "Hollywood Eindhoven", tip: "Neon glowgolf in een leuke sfeer — ook in de avond open.", url: "https://hollywood.nl" },
+  ],
+  27: [ // Dierenshow / Valkenierij
+    { name: "Falcon Crest", tip: "Check openingstijden en boek vooraf — unieke ervaring.", url: "https://falconcrest.eu" },
+  ],
+  28: [ // Parachutespringen
+    { name: "ENPC Teuge (±1 uur rijden)", tip: "Grootste parachutistenclub van Nederland — ga op een heldere dag.", url: "https://enpc.nl" },
+  ],
+  30: [ // Boogschieten
+    { name: "Boogschietvereniging Eindhoven", tip: "Proeflessen beschikbaar voor beginners — bel vooraf voor openingstijden." },
+  ],
+  32: [ // Paint & Sip
+    { name: "Rembrandt van Wine (centrum)", tip: "Schilderen en wijn combineren — geen ervaring nodig, wel heel gezellig.", url: "https://rembrandtvanwine.nl" },
+  ],
+  33: [ // Workshop schilderen
+    { name: "Sip & Make Eindhoven", tip: "Gezellige workshop in kleine groep — ook boekbaar als privéles.", url: "https://sipandmake.nl" },
+  ],
+  34: [ // Samen schilderen
+    { name: "Atelier Penelope van der Werf", tip: "Persoonlijke studio-ervaring — bel of mail vooraf voor beschikbaarheid.", url: "https://penelopevanderwerf.nl" },
+  ],
+  35: [ // Keramiek
+    { name: "Kleicafé Eindhoven", tip: "Draaien aan de pottenbakkersschijf — geen ervaring nodig, neem je creatie mee naar huis.", url: "https://kleicafe.nl" },
+  ],
+  36: [ // Sieraden maken
+    { name: "Do Collection (centrum)", tip: "Workshop met echte materialen — neem je zelfgemaakte sieraad mee naar huis.", url: "https://workshop.do-collection.nl" },
+  ],
+  37: [ // Goudsmeden
+    { name: "Atelier Aroha Eindhoven", tip: "Maak je eigen ring of hanger — bijzonder cadeau voor jezelf of elkaar.", url: "https://atelieraroha.nl" },
+  ],
+  38: [ // Bloemschikken
+    { name: "Sandra Luz Bloemstudio", tip: "Kleine groepen, persoonlijke begeleiding — check de agenda voor beschikbare data.", url: "https://sandraluz.nl" },
+  ],
+  39: [ // Fotografie workshop
+    { name: "Fotografiecursus Eindhoven (centrum)", tip: "Buiten fotograferen door de stad — neem je eigen camera mee.", url: "https://fotografiecursuseindhoven.nl" },
+  ],
+  42: [ // Bierproeverij
+    { name: "Rabauw (Strijp-S)", tip: "Lokale craft bierproeverij in industrieel Strijp-S — reserveren aanbevolen.", url: "https://rabauw.org" },
+  ],
+  43: [ // Stadsbrouwerij
+    { name: "Stadsbrouwerij Eindhoven", tip: "Kijk hoe lokaal bier wordt gebrouwen en proef ter plekke.", url: "https://stadsbrouwerijeindhoven.nl" },
+  ],
+  44: [ // Koffietentje
+    { name: "Zwart Wit Koffie (centrum)", tip: "Specialiteitenkoffie in een rustige sfeer — ideaal voor een ontspannen ochtend.", url: "https://zwartwitkoffie.nl" },
+    { name: "Doppio Espresso (centrum)", tip: "Gezellige koffiebar, meerdere locaties in Eindhoven." },
+    { name: "Lot Sixty One (centrum)", tip: "Populaire specialty coffee bar — altijd een goede kop koffie." },
+  ],
+  45: [ // Wandeling stadscentrum
+    { name: "18 Septemberplein → Stratumseind → Dommel", tip: "De klassieker: cafés, historische architectuur en de rivier in één ronde." },
+    { name: "Strijp-S wijk", tip: "Industrieel erfgoed, street art en creatieve hotspots — heel anders dan het centrum." },
+    { name: "Witte Dame / Design District", tip: "Rondom het Van Abbemuseum langs de mooiste designgebouwen van Eindhoven." },
+  ],
+  46: [ // Wandeling in het park
+    { name: "Genneper Parken", tip: "Uitgestrekt park met meerdere wandelpaden langs het water — aanrader in het voorjaar." },
+    { name: "Stadswandelpark (centrum)", tip: "Centraal gelegen, ideaal voor een snel rondje midden in de stad." },
+    { name: "Dommelpad (langs de Dommel)", tip: "Rustieke route langs de rivier, erg mooi als het groen uitloopt." },
+  ],
+  47: [ // Wandeling Landgoed Wielewaal
+    { name: "Landgoed de Wielewaal", tip: "Volg het gele wandelmarkeringspaaltje voor de mooiste route door het landgoed." },
+  ],
+  48: [ // Picknick in het park
+    { name: "Genneper Parken", tip: "Prachtig grasveld bij het vijver — goed bereikbaar met de fiets, gratis parkeren." },
+    { name: "Stadswandelpark (centrum)", tip: "Rustig en groen, pal naast het centrum. Perfect voor een spontane picknick." },
+    { name: "Philips de Jonghpark (Woensel)", tip: "Groot en groen, weinig drukte door de week. Gezellige buurtsfeer." },
+    { name: "Hoge Akkers (Tongelreep)", tip: "Aan het water, meer rust dan de parken in het centrum." },
+  ],
+  49: [ // Sauna
+    { name: "Spa Sense Eindhoven", tip: "Moderne wellness met verschillende sauna's en behandelingen — boek vooraf.", url: "https://spasense.nl" },
+  ],
+  50: [ // Massage
+    { name: "Touch & Balance Eindhoven", tip: "Professionele massages voor koppels — vraag naar het duo-arrangement.", url: "https://touchandbalance.nl" },
+  ],
+  51: [ // Bioscoop
+    { name: "Pathé Eindhoven (centrum)", tip: "Groot bioscoop op de Nieuwstraat — IMAX-zaal aanwezig voor een extra beleving.", url: "https://pathe.nl" },
+  ],
+  52: [ // Museum
+    { name: "DAF Museum (centrum)", tip: "Uniek automuseum — ook leuk als je geen autofanaat bent.", url: "https://dafmuseum.nl" },
+    { name: "Van Abbemuseum", tip: "Modern en hedendaags kunstmuseum — gratis toegang op bepaalde dagen.", url: "https://vanabbemuseum.nl" },
+    { name: "Philips Museum (centrum)", tip: "Geschiedenis van Philips en zijn uitvindingen — interactief en interessant.", url: "https://philipsmuseum.nl" },
+  ],
+  53: [ // Feel good market
+    { name: "Feel Good Market Eindhoven", tip: "Check de website voor actuele data en locaties — wisselt per seizoen.", url: "https://feelgoodmarket.nl" },
+  ],
+  54: [ // Cocktailbar
+    { name: "The Black Cat (centrum)", tip: "Gezellige cocktailbar in het centrum — goede sfeer op vrijdag- en zaterdagavond.", url: "https://the-blackcat.nl" },
+    { name: "Stratumseind", tip: "Langste uitgaansstraat van Nederland — meerdere cocktailbars naast elkaar." },
+  ],
+  55: [ // Wijnbar
+    { name: "La Casera (centrum)", tip: "Sfeervolle wijnbar met een mooie selectie — ook kleine hapjes beschikbaar.", url: "https://la-casera.nl" },
+  ],
+  56: [ // Samen uit eten
+    { name: "Stratumseind & Dommelstraat", tip: "Meeste restaurants geconcentreerd in het centrum — loop rond en kies op gevoel." },
+    { name: "Strijp-S restaurants", tip: "Hippe eetgelegenheden in de creatieve wijk — iets origineeler dan het centrum." },
+  ],
+  58: [ // Fietsen
+    { name: "Dommelpad (langs de Dommel)", tip: "Rustieke fietsroute langs de rivier — start bij het centrum." },
+    { name: "Kempenroute", tip: "Mooie fietsroute door het Kempische landschap, net buiten Eindhoven." },
+    { name: "Genneper Parken", tip: "Korter maar erg ontspannend — ideaal voor een rustig fietstocht." },
+  ],
+  62: [ // Schaatsen
+    { name: "IJsbaan Eindhoven (seizoensgebonden)", tip: "Check hun website voor openingstijden — tijdelijk beschikbaar in de winter." },
+    { name: "Thialf (Heerenveen)", tip: "Iets verder weg maar een topervaring als je écht wilt schaatsen.", url: "https://thialf.nl" },
+  ],
+
+  64: [ // Bootje huren
+    { name: "Eindje Suppen (Genneper Parken)", tip: "Sloepjes en kleine bootjes te huur bij de watermolen — ook voor beginners, geen vaarbewijs nodig.", url: "https://www.eindjesuppen.nl/" },
+    { name: "Dommel (stadscentrum)", tip: "Rustig varen door het centrum van Eindhoven — uniek uitzicht op de stad vanuit het water." },
+  ],
+  65: [ // Avond SUP tour
+    { name: "Eindje Suppen (Genneper Parken)", tip: "Zonsondergangstour op het water met LED-verlichting — reserveer vooraf, populair in de zomer.", url: "https://www.eindjesuppen.nl/" },
+  ],
+  66: [ // Bijlwerpen
+    { name: "All In Eindhoven (Strijp-S)", tip: "Professionele bijlwerpbanen met begeleiding — geen ervaring nodig, 18+ verplicht.", url: "https://allineindhoven.nl/portfolio/bijlwerpen/" },
+  ],
+  67: [ // VR escape experience
+    { name: "Enversed (Eindhoven)", tip: "Free-roam VR in een grote hal — jullie bewegen echt door de ruimte. Boek ruim van tevoren.", url: "https://enversed.com/" },
+  ],
+  68: [ // Outdoor escape tocht
+    { name: "Stadscentrum Eindhoven", tip: "De tocht start in het centrum — aanwijzingen via je telefoon, geen begeleider nodig.", url: "https://escapetours.com/" },
+    { name: "Genneper Parken (natuurvariant)", tip: "Sommige aanbieders bieden ook een bosvariant aan buiten het centrum — rustiger en anders van sfeer." },
+  ],
+  69: [ // Food tour
+    { name: "Sips & Steps (centrum)", tip: "Begeleide food tour langs de beste eettentjes van Eindhoven — reserveer vooraf, 18+ i.v.m. drankjes.", url: "https://sipsandsteps.com/nl" },
+    { name: "Stratumseind & Dommelstraat", tip: "Zelf een food tour samenstellen langs de restaurants in het centrum werkt ook goed — start bij het 18 Septemberplein." },
+  ],
+  70: [ // Shuffleboard
+    { name: "All In Eindhoven (Strijp-S)", tip: "Meerdere shuffleboardtafels in een gezellige bar — inclusief drankjes, reserveren aanbevolen.", url: "https://allineindhoven.nl/en/portfolio/shuffleboard/" },
+  ],
+  71: [ // Dark dining
+    { name: "Dinner in Motion (wisselende locatie)", tip: "Reizend dark dining concept — check hun website voor de eerstvolgende datum in of nabij Eindhoven.", url: "https://www.dinnerinmotion.nl/" },
+  ],
+  72: [ // Cocktail workshop
+    { name: "The Black Cat (centrum)", tip: "Vraag naar besloten cocktailworkshops voor twee — de barmannen geven graag priveles.", url: "https://the-blackcat.nl/" },
+    { name: "Vierhoog Eindhoven", tip: "Cocktailworkshops te boeken via de bar — leuk combineren met een bowlingavond.", url: "https://www.vierhoogeindhoven.nl/" },
+  ],
+  73: [ // Wijnproeverij
+    { name: "La Casera (centrum)", tip: "Sfeervolle wijnbar met een uitgebreide selectie — vraag de sommelier om begeleiding bij het proeven.", url: "https://www.la-casera.nl/" },
+    { name: "Rabauw (Strijp-S)", tip: "Naast bier doen ze ook wijnproeverijen — industriele sfeer, verrassend goede selectie.", url: "https://www.rabauw.org/" },
+  ],
+  74: [ // Dessert bar
+    { name: "Sweet Brothers (centrum)", tip: "Gespecialiseerde dessertbar met wisselend menu — reserveer een tafel op drukke avonden.", url: "https://www.sweetbrothers.nl/" },
+    { name: "Doppio Espresso (centrum)", tip: "Groot aanbod zoetigheden bij de koffie — meerdere locaties in Eindhoven, geen reservering nodig." },
+  ],
+  75: [ // High tea
+    { name: "Pullman Hotel Eindhoven", tip: "Luxe high tea in een sfeervol hotel — reserveer minimaal een week van tevoren.", url: "https://www.pullmanhotels.com/nl/hotel-eindhoven" },
+    { name: "Grand Cafe Berlage (centrum)", tip: "Klassieke grand cafe sfeer met een uitgebreide high tea — centraal gelegen en goed bereikbaar." },
+  ],
+  76: [ // Filmhuis
+    { name: "LAB-1 (Strijp-S)", tip: "Arthouse bioscoop in het creatieve Strijp-S — kleine zalen, bijzonder filmaanbod en een goed cafe erbij.", url: "https://lab1.nl/" },
+    { name: "Natlab (Strijp-S)", tip: "Iconisch filmhuis in een voormalig Philips-laboratorium — sfeervolle locatie met curatief programma.", url: "https://natlab.nl/" },
+  ],
+  77: [ // Rooftop bar
+    { name: "VANE Rooftop (Strijp-S)", tip: "Rooftop restaurant en bar met panoramisch uitzicht over Eindhoven — reserveer zeker op zomerse avonden.", url: "https://vanerooftop.com/" },
+  ],
+  78: [ // Sterren kijken
+    { name: "Karpendonkse Plas", tip: "Donkerder dan het stadscentrum, mooi aan het water — neem een kleed en iets warms mee." },
+    { name: "Strabrechtse Heide (±20 min)", tip: "Weinig lichtvervuiling, prachtige heide als achtergrond — beste plek in de regio voor sterren kijken." },
+    { name: "Genneper Parken (zuidkant)", tip: "Het groene deel het verst van de stad biedt verrassend donkere nachten — goed bereikbaar per fiets." },
+  ],
+  79: [ // Bordspel cafe
+    { name: "Spellenparadijs Eindhoven", tip: "Honderden bordspellen beschikbaar — het personeel helpt je altijd een spel kiezen dat bij jullie past." },
+    { name: "Cafe de Leeuw (centrum)", tip: "Bruine kroeg met een ruim aanbod aan gezelschapsspellen — gezellige sfeer en goed bier." },
+  ],
+  80: [ // Foodhall
+    { name: "Down Town Gourmet Market (centrum)", tip: "Verschillende food stands onder een dak — ieder kiest zijn eigen gerecht, relaxed en veelzijdig.", url: "https://www.downtownfoodmarket.nl/" },
+    { name: "Foodhallen (Strijp-S)", tip: "Hip foodhallen-concept in de creatieve wijk — van sushi tot tapas, altijd drukte en sfeer." },
+  ],
+  81: [ // Galerie bezoeken
+    { name: "Van Abbemuseum (centrum)", tip: "Modern en hedendaags kunstmuseum — neem de tijd en reageer op wat jullie zien. Gratis op bepaalde dagen.", url: "https://vanabbemuseum.nl/" },
+    { name: "Witte Dame (Design District)", tip: "Rondom de Witte Dame zijn meerdere kleine galeries gevestigd — vrije toegang, perfect voor een middag slenteren." },
+    { name: "Galerie Bert Revers (centrum)", tip: "Kleine maar mooie galerie met wisselende tentoonstellingen — intiem en laagdrempelig." },
+  ],
+  82: [ // Sound healing
+    { name: "Lotus Yoga & Wellness (centrum)", tip: "Regelmatige klankschaalsessies voor beginners — check de agenda voor eerstvolgende datum.", url: "https://www.lotusyoga.nl/" },
+    { name: "Flow Studio Eindhoven", tip: "Meditatie en sound healing sessies in een rustige studio — reserveer vooraf, kleine groepen." },
+  ],
+  83: [ // Yoga
+    { name: "Lotus Yoga Eindhoven (centrum)", tip: "Beginnerslessen en duo-yoga mogelijk — neem je eigen mat mee of leen er een ter plekke.", url: "https://www.lotusyoga.nl/" },
+    { name: "Yogalife Eindhoven", tip: "Groot aanbod aan lessoorten — ook 'yoga voor beginners' speciaal voor mensen die het nog nooit hebben geprobeerd." },
+  ],
+  84: [ // Pubquiz
+    { name: "Cafe de Leeuw (centrum)", tip: "Wekelijkse pubquiz op dinsdag- of woensdagavond — gratis meedoen, winnaars krijgen een borreltje." },
+    { name: "Stroomhuis (Strijp-S)", tip: "Regelmatige quiz nights in een groot muziekcafe — check hun agenda voor data.", url: "https://stroomhuis.nl/" },
+    { name: "Stratumseind", tip: "Meerdere cafes op Stratumseind organiseren quiz nights — gewoon binnenlopen en vragen." },
+  ],
+  85: [ // Live muziek
+    { name: "Effenaar (centrum)", tip: "Het grote muziekpodium van Eindhoven — van kleine clubshows tot grote namen. Check de agenda.", url: "https://www.effenaar.nl/" },
+    { name: "Stroomhuis (Strijp-S)", tip: "Smaller en intiemer dan Effenaar — vaak verrassende lokale en nationale acts.", url: "https://stroomhuis.nl/" },
+    { name: "Wilhelmina Eindhoven", tip: "Bruine kroeg met livemuziek in het weekend — gezellig en geen toegangskosten." },
+  ],
+  86: [ // Karaoke
+    { name: "Vierhoog Eindhoven (centrum)", tip: "Karaoke-avonden in een hippe setting — ook bowlen en cocktails, dus een complete avond.", url: "https://www.vierhoogeindhoven.nl/" },
+    { name: "Stratumseind (diverse bars)", tip: "Op de uitgaansstraat zijn meerdere bars met karaoke — gewoon binnenlopen op vrijdag- of zaterdagavond." },
+  ],
+  87: [ // Vinyl bar
+    { name: "Plato (centrum)", tip: "Grote platenzaak met luisterhoek — soms ook avonden met vinyl draaien en drankjes erbij.", url: "https://www.plato.nl/eindhoven" },
+    { name: "The Player Eindhoven", tip: "Intieme bar waar vinyl centraal staat — vraag de barman naar zijn favoriete plaat van de week." },
+  ],
+  88: [ // Luxe picknick
+    { name: "Genneper Parken", tip: "Mooiste picknicklocatie van Eindhoven — sommige aanbieders bezorgen de mand direct op locatie.", url: "https://indebuurt.nl/eindhoven/genieten-van/perfecte-spot-5-x-leuke-picknickplekken-in-eindhoven~116911/" },
+    { name: "Karpendonkse Plas", tip: "Aan het water, rustig en groen — ideaal voor een zonsondergangpicknick." },
+  ],
+  89: [ // Diepgaand vragenspel
+    { name: "Thuis (eigen bank)", tip: "Kaartenspellen zoals Wnr of De Connectie zijn online te bestellen — werkt het best in een rustige setting." },
+    { name: "Rustig cafe (centrum)", tip: "Kies een rustig cafe buiten de drukke uren — een hoektafel en twee drankjes zijn alles wat je nodig hebt." },
+  ],
+  90: [ // GPS-speurtocht
+    { name: "Stadscentrum Eindhoven (start: 18 Septemberplein)", tip: "De route begint in het hart van de stad — download de app en volg de GPS-coordinaten.", url: "https://speurtocht.nl/product/speurtocht-eindhoven/" },
+    { name: "Strijp-S (alternatieve route)", tip: "Sommige aanbieders hebben ook een route door Strijp-S — creatievere wijk, iets minder bekend." },
+  ],
+};
+
+/* ═══════════════════════════════════════════════
+   ACTIVITEIT TIJDSTIP (dag / avond / altijd)
+═══════════════════════════════════════════════ */
+const ACTIVITY_TIMES = {
+  1:'dag',
+  2:'dag',
+  3:'dag',
+  4:'dag',
+  5:'dag',
+  6:'dag',
+  91:'altijd',
+  92:'altijd',
+  7:'altijd',
+  8:'altijd',
+  9:'altijd',
+  93:'altijd',
+  14:'altijd',
+  15:'altijd',
+  67:'altijd',
+  16:'altijd',
+  17:'dag',
+  94:'altijd',
+  95:'altijd',
+  18:'altijd',
+  19:'altijd',
+  20:'dag',
+  21:'dag',
+  96:'altijd',
+  97:'altijd',
+  22:'altijd',
+  98:'altijd',
+  26:'altijd',
+  99:'altijd',
+  27:'dag',
+  52:'dag',
+  32:'avond',
+  34:'dag',
+  33:'dag',
+  35:'dag',
+  36:'dag',
+  100:'altijd',
+  38:'dag',
+  39:'dag',
+  101:'altijd',
+  102:'altijd',
+  103:'altijd',
+  104:'altijd',
+  72:'avond',
+  73:'avond',
+  46:'dag',
+  105:'altijd',
+  48:'dag',
+  50:'dag',
+  106:'altijd',
+  107:'altijd',
+  108:'altijd',
+  109:'altijd',
+  110:'altijd',
+  111:'altijd',
+  112:'altijd',
+  113:'altijd',
+  114:'altijd',
+  51:'avond',
+  115:'altijd',
+  81:'dag',
+  116:'altijd',
+  10:'altijd',
+  117:'altijd',
+  118:'altijd',
+  119:'altijd',
+  120:'altijd',
+  54:'avond',
+  55:'avond',
+  121:'altijd',
+  122:'altijd',
+  123:'altijd',
+  23:'altijd',
+  24:'altijd',
+  13:'altijd',
+  70:'altijd',
+  124:'altijd',
+  125:'altijd',
+  84:'avond',
+  126:'altijd',
+  127:'altijd',
+  128:'altijd',
+  11:'dag',
+  129:'altijd',
+  130:'altijd',
+  75:'dag',
+  131:'altijd',
+  132:'altijd',
+  133:'altijd',
+  134:'altijd',
+  135:'altijd',
+  136:'altijd',
+  137:'altijd',
+  138:'altijd',
+  139:'altijd',
+  140:'altijd',
+  141:'altijd',
+  142:'altijd',
+  143:'altijd',
+  144:'altijd',
+  145:'altijd',
+  146:'altijd',
+  147:'altijd',
+  148:'altijd',
+  149:'altijd',
+  150:'altijd',
+  151:'altijd',
+  152:'altijd',
+  153:'altijd',
+  154:'altijd',
+  155:'altijd',
+  156:'altijd',
+  157:'altijd',
+  158:'altijd',
+  159:'altijd',
+  160:'altijd',
+  161:'altijd',
+  162:'altijd',
+  163:'altijd',
+  164:'altijd',
+  165:'altijd',
+  166:'altijd',
+  167:'altijd',
+  168:'altijd',
+  169:'altijd',
+  170:'altijd',
+  171:'altijd',
+  172:'altijd',
+  173:'altijd',
+  174:'altijd',
+  175:'altijd',
+  176:'altijd',
+  177:'altijd',
+  178:'altijd',
+  179:'altijd',
+  180:'altijd',
+  181:'altijd',
+  182:'altijd',
+  183:'altijd',
+  184:'altijd',
+  185:'altijd',
+  186:'altijd',
+  12:'dag',
+  187:'altijd',
+  188:'altijd',
+  189:'altijd',
+  29:'dag',
+  30:'dag',
+  41:'altijd',
+  28:'dag',
+  190:'altijd',
+  191:'altijd',
+  192:'altijd',
+  193:'altijd',
+  61:'dag',
+  37:'dag',
+  194:'altijd',
+  195:'altijd',
+  196:'altijd',
+  197:'altijd',
+  198:'altijd',
+  199:'altijd',
+  200:'altijd',
+  201:'altijd',
+  202:'altijd',
+  203:'altijd',
+  57:'avond'
+}
+
+/* ═══════════════════════════════════════════════
+   GEBRUIKERSPROFIEL  (localStorage)
+═══════════════════════════════════════════════ */
+const Profile = (() => {
+  const KEY = 'dateivety_profile';
+  let d = (() => { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {};} catch(e) { return {}; } })();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {} }
+  return {
+    get name()    { return d.name || ''; },
+    setName(v)    { d.name = v.trim(); save(); },
+    hasName()     { return !!(d.name && d.name.trim()); },
+  };
+})();
+
+/* ═══════════════════════════════════════════════
+   BEOORDELINGEN  (localStorage)
+═══════════════════════════════════════════════ */
+const Ratings = (() => {
+  const KEY = 'dateivety_ratings';
+  let d = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e) { return {}; } })();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {} }
+  return {
+    get(id)        { return d[id] || 0; },
+    set(id, stars) { d[id] = stars; save(); },
+  };
+})();
+
+/* ═══════════════════════════════════════════════
+   WEER  (Open-Meteo — Eindhoven)
+═══════════════════════════════════════════════ */
+let weatherRain = false;
+(async () => {
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.44&longitude=5.48&current_weather=true&timezone=Europe/Amsterdam');
+    const j = await r.json();
+    weatherRain = ((j.current_weather || {}).weathercode || 0) >= 51;
+  } catch(e) {}
+})();
+
+/* ═══════════════════════════════════════════════
+   APP STATE & LOGIC
+═══════════════════════════════════════════════ */
+const App = (() => {
+  let ans = { vibe:[], intensity:null, duration:null, budget:null };
+  let selectedWhen  = 'any';
+  let prevScreen    = 'screen-welcome';
+  let modalActivity  = null;
+  let surpriseMode   = false;
+  let shownIds       = [];
+  let currentResults = [];
+  let currentSort    = 'default';
+  let currentSortDir = 'asc';
+
+  /* Helpers */
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function updateBadges() {
+    const n = Favs.count();
+    ['welcome-fav-badge','results-fav-badge'].forEach(bid => {
+      const el = document.getElementById(bid);
+      if (!el) return;
+      el.textContent = n;
+      el.classList.toggle('show', n > 0);
+    });
+    // Hartje-emoji updaten op welkomstknop
+    const wb = document.querySelector('.welcome-fav-btn .btn-emoji');
+    if (wb) wb.textContent = n > 0 ? '❤️' : '🤍';
+    // Hartje-emoji updaten op results-knop
+    const rb = document.querySelector('#screen-results .icon-btn .btn-emoji');
+    if (rb) rb.textContent = n > 0 ? '❤️' : '🤍';
+  }
+
+  function renderOpts(listId, opts, key, maxSel) {
+    const el = document.getElementById(listId);
+    el.innerHTML = '';
+    opts.forEach(o => {
+      const div = document.createElement('div');
+      div.className = 'opt';
+      div.dataset.val = o.v;
+      div.innerHTML = `
+        <div class="opt-icon">${o.e}</div>
+        <div class="opt-text">
+          <div class="opt-label">${o.l}</div>
+          <div class="opt-sub">${o.s}</div>
+        </div>
+        <div class="opt-check"></div>`;
+      div.addEventListener('click', () => pick(div, key, maxSel, listId));
+      el.appendChild(div);
+    });
+  }
+
+  function pick(card, key, maxSel, listId) {
+    const val = card.dataset.val;
+    if (maxSel === 1) {
+      document.querySelectorAll(`#${listId} .opt`).forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      ans[key] = val;
+    } else {
+      if (card.classList.contains('selected')) {
+        card.classList.remove('selected');
+        ans[key] = ans[key].filter(v => v !== val);
+      } else {
+        if (document.querySelectorAll(`#${listId} .opt.selected`).length >= maxSel) return;
+        card.classList.add('selected');
+        ans[key].push(val);
+      }
+    }
+    const btnMap = { vibe:'btn1', intensity:'btn2', duration:'btn3', budget:'btn4' };
+    const btn = document.getElementById(btnMap[key]);
+    const hasVal = Array.isArray(ans[key]) ? ans[key].length > 0 : ans[key] !== null;
+    btn.classList.toggle('on', hasVal);
+  }
+
+  /* Matching */
+  const lvlOrder = ['laag','middel','hoog'];
+  const durOrder = ['max 1 uur','1-2 uur','2+ uur'];
+  const priceOrder = ['0-15','15-40','40+'];
+
+  function match() {
+    const month = new Date().getMonth(); // 0=jan … 11=dec
+    const isWinter = month <= 1 || month >= 10;
+    const isSummer = month >= 4 && month <= 8;
+
+    let scored = ACTIVITIES.map(a => {
+      let s = 0;
+      // Vibe — hard filter
+      const vibeHits = ans.vibe.filter(v => a.cats.includes(v)).length;
+      if (!vibeHits) return null;
+      s += vibeHits * 10;
+      // Intensity
+      const di = Math.abs(lvlOrder.indexOf(ans.intensity) - lvlOrder.indexOf(a.lvl));
+      if (di === 0) s += 8;
+      else if (di === 1) s += 3;
+      else return null;
+      // Duration
+      if (ans.duration !== 'any') {
+        const dd = Math.abs(durOrder.indexOf(ans.duration) - durOrder.indexOf(a.dur));
+        if (dd === 0) s += 6; else if (dd === 1) s += 2;
+      } else s += 3;
+      // Budget
+      if (ans.budget !== 'any') {
+        const dp = Math.abs(priceOrder.indexOf(ans.budget) - priceOrder.indexOf(a.price));
+        if (dp === 0) s += 6; else if (dp === 1) s += 2;
+      } else s += 3;
+      // Tijdstip
+      const t = ACTIVITY_TIMES[a.id] || 'altijd';
+      if (selectedWhen === 'avond')   { if (t === 'dag')   s -= 3; if (t === 'avond') s += 2; }
+      if (selectedWhen === 'overdag') { if (t === 'avond') s -= 2; if (t === 'dag')   s += 1; }
+      // Seizoen
+      if (a.loc === 'buiten') { if (isWinter) s -= 2; if (isSummer) s += 1; }
+      // Regen
+      if (weatherRain && a.loc === 'buiten') s -= 4;
+      if (weatherRain && a.loc === 'beide')  s -= 2;
+      return { a, s };
+    }).filter(Boolean).sort((x,y) => y.s - x.s);
+
+    // Variety: max 2 per type
+    const typeCnt = {};
+    const out = [];
+    for (const item of scored) {
+      typeCnt[item.a.type] = (typeCnt[item.a.type] || 0) + 1;
+      if (typeCnt[item.a.type] <= 2) out.push(item.a);
+      if (out.length >= 12) break;
+    }
+    // Fallback: relax, just use vibe filter
+    if (out.length < 5) {
+      const fallback = ACTIVITIES.filter(a => !out.find(r => r.id === a.id) && ans.vibe.some(v => a.cats.includes(v)));
+      out.push(...fallback.slice(0, 12 - out.length));
+    }
+    return out;
+  }
+
+  /* Render results */
+  function updateGreeting() {
+    const el = document.getElementById('welcome-greeting');
+    if (!el) return;
+    if (Profile.hasName()) {
+      el.textContent = `Welkom terug, ${Profile.name}! 👋`;
+      el.style.display = 'block';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  function sortedList(list, mode) {
+    const copy = list.slice();
+    const dir  = currentSortDir === 'desc' ? -1 : 1;
+    if (mode === 'price') {
+      copy.sort((a, b) => dir * (priceOrder.indexOf(a.price) - priceOrder.indexOf(b.price)));
+    } else if (mode === 'dur') {
+      copy.sort((a, b) => dir * (durOrder.indexOf(a.dur) - durOrder.indexOf(b.dur)));
+    } else if (mode === 'rating') {
+      copy.sort((a, b) => (Ratings.get(b.id) || 0) - (Ratings.get(a.id) || 0));
+    }
+    return copy;
+  }
+
+  function renderCards(list) {
+    const body = document.getElementById('results-body');
+    body.innerHTML = '';
+    if (!list.length) {
+      body.innerHTML = `<div class="no-results"><div class="no-results-icon">😅</div><div class="no-results-title">Geen resultaten</div><p class="no-results-text">Probeer je filters wat ruimer in te stellen.</p></div>`;
+      return;
+    }
+    sortedList(list, currentSort).forEach(a => body.appendChild(makeCard(a)));
+  }
+
+  function renderResults(list) {
+    currentResults = list;
+    currentSort = 'default';
+    currentSortDir = 'asc';
+    document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+    const defPill = document.getElementById('sort-default');
+    if (defPill) defPill.classList.add('active');
+    const pricePill = document.getElementById('sort-price');
+    if (pricePill) pricePill.textContent = 'Prijs ↑';
+    const durPill = document.getElementById('sort-dur');
+    if (durPill) durPill.textContent = 'Duur ↑';
+    const badge = document.getElementById('results-badge');
+    const sub   = document.getElementById('results-sub');
+    const title = document.querySelector('.results-title');
+    const vibeNames = ans.vibe.map(v => Q1.find(o => o.v === v)?.l || v).join(' & ');
+    if (title) title.textContent = Profile.hasName()
+      ? `Hé ${Profile.name}, hier zijn jullie ideeën! 🎉`
+      : `Jullie date-ideeën 🎉`;
+    sub.textContent = `Op basis van: ${vibeNames}`;
+    badge.textContent = `${list.length} date-ideeën gevonden ✨`;
+    const banner = document.getElementById('weather-banner');
+    if (banner) banner.classList.toggle('show', weatherRain);
+    renderCards(list);
+  }
+
+  const priceLabel = { '0-15':'€ tot €15', '15-40':'€15 – €40', '40+':'€40+' };
+  const lvlLabel   = { laag:'😌 Rustig', middel:'🚶 Actief', hoog:'💪 Intensief' };
+  const locLabel   = { binnen:'🏠 Binnen', buiten:'🌿 Buiten', beide:'🌿 Beide' };
+  const catLabel   = { romantisch:'🌹 Romantisch', avontuurlijk:'⚡ Avontuurlijk', ontspannend:'🌿 Ontspannend', sociaal:'🎉 Sociaal', intiem:'✨ Intiem', verbindend:'🤝 Verbindend', competitief:'🏆 Competitief', creatief:'🎨 Creatief', uniek:'🌟 Uniek' };
+
+  function makeCard(a, context) {
+    const div = document.createElement('div');
+    div.className = 'a-card';
+    div.dataset.id = a.id;
+    const isFav  = Favs.has(a.id);
+    const stars  = Ratings.get(a.id);
+    const rainTag = weatherRain && a.loc !== 'binnen'
+      ? '<span class="tag tag-rain">🌧️ Buiten</span>' : '';
+    const starsHtml = stars > 0
+      ? `<div class="card-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5 - stars)}<span style="font-size:11px;color:var(--brown-light);margin-left:5px">Jullie beoordeling</span></div>` : '';
+    div.innerHTML = `
+      <button class="fav-btn ${isFav ? 'on' : ''}" data-id="${a.id}" title="${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}">
+        ${isFav ? '❤️' : '🤍'}
+      </button>
+      <div class="card-top" style="padding-right:44px">
+        <div class="card-thumb-wrap">
+          <span class="card-emoji" id="thumb-emoji-${a.id}">${a.emoji}</span>
+          <img class="card-thumb" id="thumb-${a.id}" alt="${a.name}" style="display:none" onload="this.style.display='block';document.getElementById('thumb-emoji-${a.id}').style.display='none'">
+        </div>
+        <div>
+          <div class="card-name">${a.name}</div>
+          <div class="card-type">${a.type}</div>
+        </div>
+      </div>
+      <p class="card-desc">${a.desc}</p>
+      <div class="card-tags">
+        <span class="tag tag-gold">💰 ${priceLabel[a.price]}</span>
+        <span class="tag">⏱ ${a.dur}</span>
+        <span class="tag">${lvlLabel[a.lvl]}</span>
+        <span class="tag">${locLabel[a.loc]}</span>
+        ${rainTag}
+      </div>
+      ${starsHtml}`;
+
+    // Thumbnail laden
+    const thumbEl = div.querySelector(`#thumb-${a.id}`);
+    const keyword = ACTIVITY_IMGS[a.id] || a.name;
+    const setThumb = src => { thumbEl.src = src; };
+    if (imgCache[a.id]) {
+      setThumb(imgCache[a.id]);
+    } else {
+      fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=1&orientation=landscape`, {
+        headers: { Authorization: PEXELS_KEY }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.photos && data.photos.length > 0) {
+          imgCache[a.id] = data.photos[0].src.landscape;
+          setThumb(imgCache[a.id]);
+        }
+      })
+      .catch(() => {});
+    }
+
+    // Hartje stopt propagation zodat modal niet opent
+    div.querySelector('.fav-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      Favs.toggle(a.id);
+      const on = Favs.has(a.id);
+      // Sync alle hartjes met dit id over alle schermen
+      document.querySelectorAll(`.fav-btn[data-id="${a.id}"]`).forEach(b => {
+        b.classList.toggle('on', on);
+        b.textContent = on ? '❤️' : '🤍';
+        b.title = on ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten';
+      });
+      updateBadges();
+      // In favorieten-scherm: kaart verwijderen als hart uit gaat
+      if (context === 'favs' && !on) {
+        div.style.transition = 'opacity .25s';
+        div.style.opacity = '0';
+        setTimeout(() => {
+          div.remove();
+          const body = document.getElementById('favs-body');
+          if (!body.querySelector('.a-card')) renderFavs();
+        }, 260);
+      }
+    });
+
+    div.addEventListener('click', () => openModal(a));
+    return div;
+  }
+
+  function openModal(a) {
+    modalActivity = a;
+    const heroImg = document.getElementById('m-hero-img');
+    heroImg.style.display = 'none';
+    const keyword = ACTIVITY_IMGS[a.id] || a.name;
+    if (imgCache[a.id]) {
+      heroImg.src = imgCache[a.id];
+      heroImg.style.display = 'block';
+    } else {
+      fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=1&orientation=landscape`, {
+        headers: { Authorization: PEXELS_KEY }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.photos && data.photos.length > 0) {
+          imgCache[a.id] = data.photos[0].src.landscape;
+          heroImg.src = imgCache[a.id];
+          heroImg.style.display = 'block';
+        }
+      })
+      .catch(() => {});
+    }
+    document.getElementById('m-name').textContent  = a.name;
+    document.getElementById('m-type').textContent  = a.type;
+    document.getElementById('m-desc').textContent  = a.desc;
+    document.getElementById('m-grid').innerHTML = `
+      <div class="m-detail"><div class="m-detail-label">Prijs</div><div class="m-detail-val">${priceLabel[a.price]} p.p.</div></div>
+      <div class="m-detail"><div class="m-detail-label">Tijdsduur</div><div class="m-detail-val">${a.dur}</div></div>
+      <div class="m-detail"><div class="m-detail-label">Activiteit</div><div class="m-detail-val">${({laag:'Rustig',middel:'Matig actief',hoog:'Intensief'})[a.lvl]}</div></div>
+      <div class="m-detail"><div class="m-detail-label">Locatie</div><div class="m-detail-val">${({binnen:'Binnen',buiten:'Buiten',beide:'Beide'})[a.loc]}</div></div>`;
+
+    document.getElementById('m-maps-btn').href =
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.name + ' Eindhoven')}`;
+    const wb = document.getElementById('m-website-btn');
+    if (a.url) { wb.href = a.url; wb.style.display = 'flex'; }
+    else { wb.style.display = 'none'; }
+    syncModalFavBtn();
+    syncModalRating();
+    syncModalLocations();
+    document.getElementById('modal-bg').classList.add('open');
+  }
+
+  function syncModalFavBtn() {
+    if (!modalActivity) return;
+    const btn = document.getElementById('m-fav-btn');
+    const on = Favs.has(modalActivity.id);
+    btn.classList.toggle('on', on);
+    btn.textContent = on ? '❤️' : '🤍';
+  }
+
+  function syncModalRating() {
+    if (!modalActivity) return;
+    const s = Ratings.get(modalActivity.id);
+    document.querySelectorAll('#m-stars .star-btn').forEach(btn => {
+      btn.textContent = parseInt(btn.dataset.star) <= s ? '⭐' : '☆';
+    });
+  }
+
+  let locationsExpanded = false;
+  let locationsShowAll  = false;
+  const MAX_LOCS = 3;
+
+  function syncModalLocations() {
+    if (!modalActivity) return;
+    locationsExpanded = false;
+    locationsShowAll  = false;
+    const locs = LOCATIONS[modalActivity.id] || [];
+    const sec  = document.getElementById('m-locations-section');
+    const list = document.getElementById('m-locations-list');
+    const arr  = document.getElementById('m-locations-arrow');
+    sec.style.display = 'block';
+    list.style.display = 'none';
+    arr.classList.remove('open');
+    if (!locs.length) {
+      list.innerHTML = '<div class="location-empty">Nog geen locaties bekend. Ken jij een goede plek? Laat het ons weten via de knop hieronder!</div>';
+    } else {
+      renderLocationsList(locs);
+    }
+  }
+
+  function renderLocationsList(locs) {
+    const list = document.getElementById('m-locations-list');
+    const visible = locationsShowAll ? locs : locs.slice(0, MAX_LOCS);
+    var html = '';
+    visible.forEach(function(l) {
+      var href = l.url || ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.name + ' Eindhoven'));
+      var tip = l.tip ? '<div class="location-tip">' + l.tip + '</div>' : '';
+      html += '<div class="location-item"><span class="location-pin">📍</span><div class="location-info"><div class="location-name"><a class="location-name-link" href="' + href + '" target="_blank" rel="noopener">' + l.name + '</a></div>' + tip + '</div></div>';
+    });
+    list.innerHTML = html;
+    if (!locationsShowAll && locs.length > MAX_LOCS) {
+      list.innerHTML += '<button class="locations-more-btn" onclick="App.showMoreLocations()">▾ Toon nog ' + (locs.length - MAX_LOCS) + ' locatie' + (locs.length - MAX_LOCS > 1 ? 's' : '') + '</button>';
+    }
+  }
+
+  function renderFavs() {
+    const body = document.getElementById('favs-body');
+    const sub  = document.getElementById('favs-sub');
+    const list = Favs.list();
+    sub.textContent = list.length
+      ? `${list.length} opgeslagen activiteit${list.length !== 1 ? 'en' : ''}`
+      : '';
+    body.innerHTML = '';
+    if (!list.length) {
+      body.innerHTML = `
+        <div class="favs-empty">
+          <div class="favs-empty-icon">🤍</div>
+          <div class="favs-empty-title">Nog geen favorieten</div>
+          <p class="favs-empty-text">Tik op het hartje op een activiteitskaart om hem hier op te slaan.</p>
+        </div>`;
+      return;
+    }
+    list.forEach(a => body.appendChild(makeCard(a, 'favs')));
+  }
+
+  /* Public API */
+  return {
+    start() {
+      if (!Profile.hasName()) { show('screen-name'); return; }
+      ans = { vibe:[], intensity:null, duration:null, budget:null };
+      renderOpts('q1-list', Q1, 'vibe', 2);
+      show('screen-q1');
+    },
+    onNameInput(val) {
+      const btn = document.getElementById('btn-name');
+      if (!btn) return;
+      const ok = val.trim().length > 0;
+      btn.style.opacity = ok ? '1' : '.45';
+      btn.style.pointerEvents = ok ? 'auto' : 'none';
+    },
+    saveName() {
+      const val = (document.getElementById('name-input') || {}).value || '';
+      if (!val.trim()) return;
+      Profile.setName(val);
+      updateGreeting();
+      ans = { vibe:[], intensity:null, duration:null, budget:null };
+      renderOpts('q1-list', Q1, 'vibe', 2);
+      show('screen-q1');
+    },
+    pickWhen(v) {
+      selectedWhen = v;
+      document.querySelectorAll('.when-chip').forEach(c => c.classList.toggle('sel', c.dataset.v === v));
+    },
+    surprise() {
+      surpriseMode = true;
+      shownIds = [];
+      const a = ACTIVITIES[Math.floor(Math.random() * ACTIVITIES.length)];
+      shownIds.push(a.id);
+      openModal(a);
+      document.getElementById('btn-next-surprise').style.display = 'block';
+    },
+    nextSurprise() {
+      var pool = ACTIVITIES.filter(a => !shownIds.includes(a.id));
+      if (!pool.length) { shownIds = []; pool = ACTIVITIES.slice(); }
+      const a = pool[Math.floor(Math.random() * pool.length)];
+      shownIds.push(a.id);
+      openModal(a);
+      document.getElementById('btn-next-surprise').style.display = 'block';
+      document.querySelector('.modal').scrollTop = 0;
+    },
+    toggleLocations() {
+      if (!modalActivity) return;
+      locationsExpanded = !locationsExpanded;
+      const list = document.getElementById('m-locations-list');
+      const arr  = document.getElementById('m-locations-arrow');
+      list.style.display = locationsExpanded ? 'block' : 'none';
+      arr.classList.toggle('open', locationsExpanded);
+    },
+    showMoreLocations() {
+      if (!modalActivity) return;
+      locationsShowAll = true;
+      renderLocationsList(LOCATIONS[modalActivity.id] || []);
+    },
+    suggestLocation() {
+      if (!modalActivity) return;
+      const act  = modalActivity.name;
+      const sub  = encodeURIComponent('Locatiesuggestie: ' + act);
+      const body = encodeURIComponent(
+        'Activiteit: ' + act + '\n\n' +
+        'Naam van de locatie:\n\n' +
+        'Adres of korte omschrijving:\n\n' +
+        'Website of Maps-link (optioneel):\n'
+      );
+      window.open('mailto:' + SUGGEST_EMAIL + '?subject=' + sub + '&body=' + body);
+    },
+    shareWhatsApp() {
+      if (!modalActivity) return;
+      const a = modalActivity;
+      var url = a.url;
+      if (!url) {
+        var locs = LOCATIONS[a.id] || [];
+        for (var i = 0; i < locs.length; i++) {
+          if (locs[i].url) { url = locs[i].url; break; }
+        }
+      }
+      var text = 'Zin in ' + a.name + '?\n\n' + a.desc;
+      if (url) { text += '\n\nMeer info: ' + url; }
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    },
+    rateActivity(stars) {
+      if (!modalActivity) return;
+      Ratings.set(modalActivity.id, stars);
+      syncModalRating();
+      document.querySelectorAll(`.a-card[data-id="${modalActivity.id}"]`).forEach(card => {
+        let el = card.querySelector('.card-stars');
+        if (!el) { el = document.createElement('div'); el.className = 'card-stars'; card.appendChild(el); }
+        el.innerHTML = `${'⭐'.repeat(stars)}${'☆'.repeat(5 - stars)}<span style="font-size:11px;color:var(--brown-light);margin-left:5px">Jullie beoordeling</span>`;
+      });
+    },
+    toQ2() {
+      if (!ans.vibe.length) return;
+      renderOpts('q2-list', Q2, 'intensity', 1);
+      show('screen-q2');
+    },
+    toQ3() {
+      if (!ans.intensity) return;
+      renderOpts('q3-list', Q3, 'duration', 1);
+      show('screen-q3');
+    },
+    toQ4() {
+      if (!ans.duration) return;
+      renderOpts('q4-list', Q4, 'budget', 1);
+      show('screen-q4');
+    },
+    showResults() {
+      if (!ans.budget) return;
+      show('screen-loading');
+      setTimeout(() => {
+        const results = match();
+        renderResults(results);
+        show('screen-results');
+        updateBadges();
+      }, 1600);
+    },
+    back(target) {
+      show(target);
+    },
+    setSort(mode) {
+      if (mode === currentSort && (mode === 'price' || mode === 'dur')) {
+        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortDir = 'asc';
+      }
+      currentSort = mode;
+      document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+      const pill = document.getElementById('sort-' + mode);
+      if (pill) {
+        pill.classList.add('active');
+        if (mode === 'price') pill.textContent = 'Prijs ' + (currentSortDir === 'asc' ? '↑' : '↓');
+        if (mode === 'dur')   pill.textContent = 'Duur '  + (currentSortDir === 'asc' ? '↑' : '↓');
+      }
+      renderCards(currentResults);
+    },
+    restart() {
+      updateBadges();
+      updateGreeting();
+      show('screen-welcome');
+    },
+    openFavs(from) {
+      prevScreen = from === 'results' ? 'screen-results' : 'screen-welcome';
+      renderFavs();
+      show('screen-favs');
+    },
+    closeFavs() {
+      show(prevScreen);
+    },
+    toggleFavFromModal() {
+      if (!modalActivity) return;
+      Favs.toggle(modalActivity.id);
+      syncModalFavBtn();
+      updateBadges();
+      // Hartje op de kaart in de achtergrond ook bijwerken
+      document.querySelectorAll(`.fav-btn[data-id="${modalActivity.id}"]`).forEach(btn => {
+        const on = Favs.has(modalActivity.id);
+        btn.classList.toggle('on', on);
+        btn.textContent = on ? '❤️' : '🤍';
+      });
+    },
+    closeModal(e) {
+      if (!e || e.target === document.getElementById('modal-bg')) {
+        document.getElementById('modal-bg').classList.remove('open');
+        modalActivity = null;
+        surpriseMode = false;
+        shownIds = [];
+        document.getElementById('btn-next-surprise').style.display = 'none';
+      }
+    },
+    closeModalDirect() {
+      document.getElementById('modal-bg').classList.remove('open');
+      modalActivity = null;
+      surpriseMode = false;
+      shownIds = [];
+      document.getElementById('btn-next-surprise').style.display = 'none';
+    },
+    init() {
+      updateBadges();
+      updateGreeting();
+    }
+  };
+})();
+
+App.init();
+</script>
+</body>
+</html>
