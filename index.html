@@ -2411,7 +2411,11 @@ const App = (() => {
     list.style.display = 'none';
     arr.classList.remove('open');
     if (!locs.length) {
-      list.innerHTML = '<div class="location-empty">Nog geen locaties bekend. Ken jij een goede plek? Laat het ons weten via de knop hieronder!</div>';
+      if (modalActivity.url) {
+        renderLocationsList([{ name: modalActivity.name, tip: 'Bekijk de website voor locatie-informatie.', url: modalActivity.url }]);
+      } else {
+        list.innerHTML = '<div class="location-empty">Nog geen locaties bekend. Ken jij een goede plek? Laat het ons weten via de knop hieronder!</div>';
+      }
     } else {
       renderLocationsList(locs);
     }
