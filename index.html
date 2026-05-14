@@ -2788,11 +2788,22 @@ let   _messaging = null;
 const VAPID_KEY  = 'BA2AVd_B0WKpdjTnqD1lgfO1ndVcwuVuPrq3icfKF6DGRKE546GlRFV9Mm32wyGGMsf_GWC8vtdar1NpQ7XzWxE';
 
 // Service worker registreren voor push-meldingen
+let _swReady = false;
+let _pendingMsgUser = null, _pendingMsgRef = null;
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Dateivety/firebase-messaging-sw.js')
     .then(reg => {
-      _messaging = firebase.messaging();
-      _messaging.useServiceWorker(reg);
+      try {
+        _messaging = firebase.messaging();
+        _messaging.useServiceWorker(reg);
+      } catch(e) {
+        _messaging = firebase.messaging();
+      }
+      _swReady = true;
+      if (_pendingMsgUser) {
+        _setupMessaging(_pendingMsgUser, _pendingMsgRef);
+        _pendingMsgUser = null; _pendingMsgRef = null;
+      }
     }).catch(e => console.warn('SW registratie mislukt:', e));
 }
 
@@ -2850,16 +2861,17 @@ const FirebaseAuth = (() => {
   }
 
   async function _setupMessaging(user, ref) {
-    if (!_messaging) return;
+    if (!_messaging || !_swReady) {
+      _pendingMsgUser = user;
+      _pendingMsgRef  = ref;
+      return;
+    }
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
       const token = await _messaging.getToken({ vapidKey: VAPID_KEY });
       if (token) {
-        ref.update({
-          fcmToken: token,
-          notificationsEnabled: true
-        }).catch(() => {});
+        ref.update({ fcmToken: token, notificationsEnabled: true }).catch(() => {});
       }
     } catch(e) { console.warn('Messaging setup:', e); }
   }
