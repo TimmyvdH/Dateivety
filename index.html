@@ -2769,6 +2769,7 @@ const Dashboard = (() => {
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <script>
 const _fbConfig = {
   apiKey: "AIzaSyDBjkY2rT8DotNBFPYkzgXcmelPPkqSTV4",
@@ -2780,9 +2781,20 @@ const _fbConfig = {
   measurementId: "G-8KZ1EQ80BM"
 };
 firebase.initializeApp(_fbConfig);
-const _auth = firebase.auth();
-const _db   = firebase.firestore();
-firebase.analytics();
+const _auth      = firebase.auth();
+const _db        = firebase.firestore();
+const _analytics = firebase.analytics();
+let   _messaging = null;
+const VAPID_KEY  = 'BA2AVd_B0WKpdjTnqD1lgfO1ndVcwuVuPrq3icfKF6DGRKE546GlRFV9Mm32wyGGMsf_GWC8vtdar1NpQ7XzWxE';
+
+// Service worker registreren voor push-meldingen
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/Dateivety/firebase-messaging-sw.js')
+    .then(reg => {
+      _messaging = firebase.messaging();
+      _messaging.useServiceWorker(reg);
+    }).catch(e => console.warn('SW registratie mislukt:', e));
+}
 
 const FirebaseAuth = (() => {
   let currentUser = null;
@@ -2821,7 +2833,7 @@ const FirebaseAuth = (() => {
         App.init();
         ref.update({ lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
       } else {
-        ref.set({
+        await ref.set({
           displayName: user.displayName,
           email:       user.email,
           photoURL:    user.photoURL,
@@ -2832,7 +2844,24 @@ const FirebaseAuth = (() => {
           ratings:     {}
         });
       }
+      // Notificatie-toestemming vragen en token opslaan
+      _setupMessaging(user, ref);
     } catch(e) { console.error('Firebase sync:', e); }
+  }
+
+  async function _setupMessaging(user, ref) {
+    if (!_messaging) return;
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+      const token = await _messaging.getToken({ vapidKey: VAPID_KEY });
+      if (token) {
+        ref.update({
+          fcmToken: token,
+          notificationsEnabled: true
+        }).catch(() => {});
+      }
+    } catch(e) { console.warn('Messaging setup:', e); }
   }
 
   return {
@@ -2847,7 +2876,9 @@ const FirebaseAuth = (() => {
     saveQuiz(ans, results) {
       if (!currentUser) return;
       _db.collection('users').doc(currentUser.uid).update({
-        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+        lastSeen:       firebase.firestore.FieldValue.serverTimestamp(),
+        preferredVibes: ans.vibe,
+        preferredBudget: ans.budget,
         quizHistory: firebase.firestore.FieldValue.arrayUnion({
           ts:        new Date().toISOString(),
           vibe:      ans.vibe,
@@ -2857,6 +2888,7 @@ const FirebaseAuth = (() => {
           resultIds: results.slice(0,5).map(r => r.id)
         })
       }).catch(e => console.error('saveQuiz:', e));
+      _analytics.logEvent('quiz_completed', { vibe: ans.vibe.join(','), budget: ans.budget });
     },
     saveFavs(ids) {
       if (!currentUser) return;
