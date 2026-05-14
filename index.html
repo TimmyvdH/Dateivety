@@ -992,6 +992,7 @@
     <span id="login-btn-content">👤</span>
   </button>
   <button class="welcome-login-btn" id="dash-btn" onclick="App.openDashboard()" title="Dashboard" style="display:none;left:72px">📊</button>
+  <button class="welcome-login-btn" id="notif-btn" onclick="FirebaseAuth.enableNotifications()" title="Meldingen inschakelen" style="display:none;left:124px">🔔</button>
   <button class="welcome-fav-btn" onclick="App.openFavs('welcome')" title="Mijn favorieten">
     <span class="btn-emoji">🤍</span>
     <span class="fav-count-badge" id="welcome-fav-badge"></span>
@@ -2813,8 +2814,10 @@ const FirebaseAuth = (() => {
   _auth.onAuthStateChanged(async user => {
     currentUser = user;
     _updateBtn(user);
-    const dashBtn = document.getElementById('dash-btn');
-    if (dashBtn) dashBtn.style.display = (user && user.uid === ADMIN_UID) ? 'flex' : 'none';
+    const dashBtn  = document.getElementById('dash-btn');
+    const notifBtn = document.getElementById('notif-btn');
+    if (dashBtn)  dashBtn.style.display  = (user && user.uid === ADMIN_UID) ? 'flex' : 'none';
+    if (notifBtn) notifBtn.style.display = (user && Notification.permission !== 'granted') ? 'flex' : 'none';
     if (user) await _syncUser(user);
   });
 
@@ -2911,6 +2914,24 @@ const FirebaseAuth = (() => {
       if (!currentUser) return;
       _db.collection('users').doc(currentUser.uid).update({ ratings })
         .catch(e => console.error('saveRatings:', e));
+    },
+    async enableNotifications() {
+      if (!currentUser) return;
+      try {
+        const permission = await Notification.requestPermission();
+        const notifBtn = document.getElementById('notif-btn');
+        if (permission !== 'granted') {
+          alert('Meldingen zijn geblokkeerd. Sta meldingen toe via de adresbalk en probeer opnieuw.');
+          return;
+        }
+        if (notifBtn) notifBtn.style.display = 'none';
+        if (!_messaging) { alert('Meldingen worden zo ingeschakeld, probeer het over een moment opnieuw.'); return; }
+        const token = await _messaging.getToken({ vapidKey: VAPID_KEY });
+        if (token) {
+          await _db.collection('users').doc(currentUser.uid).update({ fcmToken: token, notificationsEnabled: true });
+          alert('✅ Meldingen zijn ingeschakeld!');
+        }
+      } catch(e) { console.error('enableNotifications:', e); }
     },
     getUser() { return currentUser; }
   };
