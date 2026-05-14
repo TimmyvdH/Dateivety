@@ -751,6 +751,12 @@
     .dash-act-name { font-size: 14px; font-weight: 600; color: var(--brown-dark); flex: 1; }
     .dash-act-score { font-size: 13px; color: var(--brown-mid); }
     .dash-loading { text-align: center; padding: 40px; color: var(--brown-mid); }
+    .dash-vibe-row { background: #fff; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(44,26,14,.06); }
+    .dash-vibe-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .dash-vibe-name { font-size: 14px; font-weight: 600; color: var(--brown-dark); }
+    .dash-vibe-count { font-size: 13px; color: var(--brown-mid); }
+    .dash-vibe-bar-bg { background: var(--peach-light); border-radius: 99px; height: 8px; }
+    .dash-vibe-bar { background: var(--terra); border-radius: 99px; height: 8px; transition: width .4s; }
 
     /* Login knop welkomstscherm */
     .welcome-login-btn {
@@ -1154,6 +1160,8 @@
       <div class="dash-label">Totaal gebruikers</div>
       <div class="dash-number" id="dash-users">—</div>
     </div>
+    <div class="dash-section-title">🎭 Meest gekozen vibes</div>
+    <div id="dash-vibes-list"></div>
     <div class="dash-section-title">🏆 Populairste activiteiten</div>
     <div id="dash-activities-list"></div>
   </div>
@@ -2748,18 +2756,56 @@ const Dashboard = (() => {
       const users = snap.docs.map(d => d.data());
       usersEl.textContent = users.length;
 
-      // Populariteit tellen
+      // ── Vibes tellen ──
+      const vibeLabels = {
+        avontuurlijk:'Avontuurlijk', creatief:'Creatief', romantisch:'Romantisch',
+        ontspannend:'Ontspannend', sociaal:'Sociaal', intiem:'Intiem',
+        verbindend:'Verbindend', competitief:'Competitief', uniek:'Uniek', evenementen:'Evenementen'
+      };
+      const vibeEmojis = {
+        avontuurlijk:'🧗', creatief:'🎨', romantisch:'💕', ontspannend:'😌',
+        sociaal:'🥂', intiem:'🕯️', verbindend:'🤝', competitief:'🏆', uniek:'✨', evenementen:'🎉'
+      };
+      const vibeCounts = {};
+      let totalVibePicks = 0;
+      users.forEach(u => {
+        (u.quizHistory || []).forEach(q => {
+          (q.vibe || []).forEach(v => {
+            vibeCounts[v] = (vibeCounts[v] || 0) + 1;
+            totalVibePicks++;
+          });
+        });
+      });
+      const vibesSorted = Object.entries(vibeCounts).sort((a, b) => b[1] - a[1]);
+      const vibesEl = document.getElementById('dash-vibes-list');
+      if (!vibesSorted.length) {
+        vibesEl.innerHTML = '<div class="dash-loading">Nog geen data beschikbaar.</div>';
+      } else {
+        const maxVibe = vibesSorted[0][1];
+        vibesEl.innerHTML = vibesSorted.map(([v, count]) => {
+          const pct = Math.round((count / maxVibe) * 100);
+          const label = vibeLabels[v] || v;
+          const emoji = vibeEmojis[v] || '🎯';
+          const share = totalVibePicks ? Math.round((count / totalVibePicks) * 100) : 0;
+          return `<div class="dash-vibe-row">
+            <div class="dash-vibe-top">
+              <span class="dash-vibe-name">${emoji} ${label}</span>
+              <span class="dash-vibe-count">${count}x (${share}%)</span>
+            </div>
+            <div class="dash-vibe-bar-bg"><div class="dash-vibe-bar" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join('');
+      }
+
+      // ── Activiteiten populariteit tellen ──
       const scores = {};
       users.forEach(u => {
-        // Favorieten: +2 punten
         (u.favs || []).forEach(id => { scores[id] = (scores[id] || 0) + 2; });
-        // Quiz resultaten: +1 punt per keer aanbevolen
         (u.quizHistory || []).forEach(q => {
           (q.resultIds || []).forEach(id => { scores[id] = (scores[id] || 0) + 1; });
         });
       });
 
-      // Sorteren op score
       const sorted = Object.entries(scores)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 15);
