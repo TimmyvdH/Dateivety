@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dateivety</title>
+  <link rel="manifest" href="/Dateivety/manifest.json">
+  <meta name="theme-color" content="#C4704B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Dateivety">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -2817,7 +2822,8 @@ const FirebaseAuth = (() => {
     const dashBtn  = document.getElementById('dash-btn');
     const notifBtn = document.getElementById('notif-btn');
     if (dashBtn)  dashBtn.style.display  = (user && user.uid === ADMIN_UID) ? 'flex' : 'none';
-    if (notifBtn) notifBtn.style.display = (user && Notification.permission !== 'granted') ? 'flex' : 'none';
+    const notifGranted = (typeof Notification !== 'undefined' && Notification.permission === 'granted');
+    if (notifBtn) notifBtn.style.display = (user && !notifGranted) ? 'flex' : 'none';
     if (user) await _syncUser(user);
   });
 

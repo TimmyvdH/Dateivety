@@ -1,0 +1,21 @@
+{
+  "name": "Dateivety",
+  "short_name": "Dateivety",
+  "description": "Vind jullie perfecte date in Eindhoven",
+  "start_url": "/Dateivety/",
+  "display": "standalone",
+  "background_color": "#FDF5EC",
+  "theme_color": "#C4704B",
+  "icons": [
+    {
+      "src": "/Dateivety/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Dateivety/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
