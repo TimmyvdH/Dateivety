@@ -725,6 +725,28 @@
     }
     .welcome-fav-btn:active { transform: scale(.9); }
 
+    /* Dashboard */
+    .dash-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(44,26,14,.07);
+    }
+    .dash-label { font-size: 14px; color: var(--brown-mid); margin-bottom: 8px; }
+    .dash-number { font-size: 52px; font-weight: 700; color: var(--terra); font-family: 'Playfair Display', serif; }
+    .dash-section-title { font-size: 15px; font-weight: 700; color: var(--brown-dark); margin: 4px 0 14px; }
+    .dash-act-row {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff; border-radius: 14px; padding: 12px 16px;
+      margin-bottom: 10px; box-shadow: 0 2px 8px rgba(44,26,14,.06);
+    }
+    .dash-rank { font-size: 18px; font-weight: 700; color: var(--terra); width: 28px; text-align: center; flex-shrink: 0; }
+    .dash-act-name { font-size: 14px; font-weight: 600; color: var(--brown-dark); flex: 1; }
+    .dash-act-score { font-size: 13px; color: var(--brown-mid); }
+    .dash-loading { text-align: center; padding: 40px; color: var(--brown-mid); }
+
     /* Login knop welkomstscherm */
     .welcome-login-btn {
       position: absolute;
@@ -969,6 +991,7 @@
   <button class="welcome-login-btn" id="welcome-login-btn" onclick="FirebaseAuth.loginOrLogout()" title="Inloggen">
     <span id="login-btn-content">👤</span>
   </button>
+  <button class="welcome-login-btn" id="dash-btn" onclick="App.openDashboard()" title="Dashboard" style="display:none;left:72px">📊</button>
   <button class="welcome-fav-btn" onclick="App.openFavs('welcome')" title="Mijn favorieten">
     <span class="btn-emoji">🤍</span>
     <span class="fav-count-badge" id="welcome-fav-badge"></span>
@@ -1101,6 +1124,22 @@
   <div class="results-body" id="results-body"></div>
   <div class="results-footer">
     <button class="btn-restart" onclick="App.restart()">↺ Opnieuw zoeken</button>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="screen-dashboard" class="screen">
+  <div class="favs-header">
+    <button class="favs-back" onclick="App.restart()">←</button>
+    <div class="favs-title">📊 Dashboard</div>
+  </div>
+  <div style="padding:20px">
+    <div class="dash-card">
+      <div class="dash-label">Totaal gebruikers</div>
+      <div class="dash-number" id="dash-users">—</div>
+    </div>
+    <div class="dash-section-title">🏆 Populairste activiteiten</div>
+    <div id="dash-activities-list"></div>
   </div>
 </div>
 
@@ -2658,6 +2697,10 @@ const App = (() => {
       shownIds = [];
       document.getElementById('btn-next-surprise').style.display = 'none';
     },
+    openDashboard() {
+      show('screen-dashboard');
+      Dashboard.load();
+    },
     init() {
       updateBadges();
       updateGreeting();
@@ -2666,6 +2709,59 @@ const App = (() => {
 })();
 
 App.init();
+</script>
+
+<!-- ── DASHBOARD LOGICA ── -->
+<script>
+const ADMIN_UID = 'beuSMKb6hwUlHMgRBxBZuu8ptQ52';
+
+const Dashboard = (() => {
+  async function load() {
+    const list = document.getElementById('dash-activities-list');
+    const usersEl = document.getElementById('dash-users');
+    list.innerHTML = '<div class="dash-loading">Laden…</div>';
+    try {
+      const snap = await _db.collection('users').get();
+      const users = snap.docs.map(d => d.data());
+      usersEl.textContent = users.length;
+
+      // Populariteit tellen
+      const scores = {};
+      users.forEach(u => {
+        // Favorieten: +2 punten
+        (u.favs || []).forEach(id => { scores[id] = (scores[id] || 0) + 2; });
+        // Quiz resultaten: +1 punt per keer aanbevolen
+        (u.quizHistory || []).forEach(q => {
+          (q.resultIds || []).forEach(id => { scores[id] = (scores[id] || 0) + 1; });
+        });
+      });
+
+      // Sorteren op score
+      const sorted = Object.entries(scores)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15);
+
+      if (!sorted.length) {
+        list.innerHTML = '<div class="dash-loading">Nog geen data beschikbaar.</div>';
+        return;
+      }
+
+      const medals = ['🥇','🥈','🥉'];
+      list.innerHTML = sorted.map(([id, score], i) => {
+        const act = ACTIVITIES.find(a => a.id === parseInt(id));
+        const name = act ? act.name : `Activiteit #${id}`;
+        return `<div class="dash-act-row">
+          <div class="dash-rank">${medals[i] || (i+1)}</div>
+          <div class="dash-act-name">${name}</div>
+          <div class="dash-act-score">${score} pt</div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      list.innerHTML = '<div class="dash-loading">Fout bij laden: ' + e.message + '</div>';
+    }
+  }
+  return { load };
+})();
 </script>
 
 <!-- ── FIREBASE ── -->
@@ -2694,6 +2790,8 @@ const FirebaseAuth = (() => {
   _auth.onAuthStateChanged(async user => {
     currentUser = user;
     _updateBtn(user);
+    const dashBtn = document.getElementById('dash-btn');
+    if (dashBtn) dashBtn.style.display = (user && user.uid === ADMIN_UID) ? 'flex' : 'none';
     if (user) await _syncUser(user);
   });
 
