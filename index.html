@@ -725,6 +725,23 @@
     }
     .welcome-fav-btn:active { transform: scale(.9); }
 
+    /* Login knop welkomstscherm */
+    .welcome-login-btn {
+      position: absolute;
+      top: 24px; left: 20px;
+      background: rgba(255,255,255,.55);
+      border: 1.5px solid rgba(196,112,75,.25);
+      border-radius: 50%;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background .18s, transform .15s;
+    }
+    .welcome-login-btn:active { transform: scale(.9); }
+    #login-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+
     /* Favorieten scherm */
     .favs-header {
       background: linear-gradient(160deg, var(--peach) 0%, var(--cream) 100%);
@@ -949,6 +966,9 @@
 
 <!-- ── WELCOME ── -->
 <div id="screen-welcome" class="screen active">
+  <button class="welcome-login-btn" id="welcome-login-btn" onclick="FirebaseAuth.loginOrLogout()" title="Inloggen">
+    <span id="login-btn-content">👤</span>
+  </button>
   <button class="welcome-fav-btn" onclick="App.openFavs('welcome')" title="Mijn favorieten">
     <span class="btn-emoji">🤍</span>
     <span class="fav-count-badge" id="welcome-fav-badge"></span>
@@ -1368,6 +1388,7 @@ const Favs = (() => {
     toggle(id) {
       ids = ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
       save();
+      FirebaseAuth.saveFavs(ids);
     },
     count()    { return ids.length; },
     list()     { return ACTIVITIES.filter(a => ids.includes(a.id)); },
@@ -2031,7 +2052,8 @@ const Ratings = (() => {
   function save() { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch(e) {} }
   return {
     get(id)        { return d[id] || 0; },
-    set(id, stars) { d[id] = stars; save(); },
+    set(id, stars) { d[id] = stars; save(); FirebaseAuth.saveRatings(d); },
+    all()          { return d; },
   };
 })();
 
@@ -2573,6 +2595,7 @@ const App = (() => {
         renderResults(results);
         show('screen-results');
         updateBadges();
+        FirebaseAuth.saveQuiz(ans, results);
       }, 1600);
     },
     back(target) {
@@ -2643,6 +2666,113 @@ const App = (() => {
 })();
 
 App.init();
+</script>
+
+<!-- ── FIREBASE ── -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
+<script>
+const _fbConfig = {
+  apiKey: "AIzaSyDBjkY2rT8DotNBFPYkzgXcmelPPkqSTV4",
+  authDomain: "dateivety-6bab6.firebaseapp.com",
+  projectId: "dateivety-6bab6",
+  storageBucket: "dateivety-6bab6.firebasestorage.app",
+  messagingSenderId: "854384318411",
+  appId: "1:854384318411:web:3d68ba6658fbc79d81484e",
+  measurementId: "G-8KZ1EQ80BM"
+};
+firebase.initializeApp(_fbConfig);
+const _auth = firebase.auth();
+const _db   = firebase.firestore();
+firebase.analytics();
+
+const FirebaseAuth = (() => {
+  let currentUser = null;
+
+  _auth.onAuthStateChanged(async user => {
+    currentUser = user;
+    _updateBtn(user);
+    if (user) await _syncUser(user);
+  });
+
+  function _updateBtn(user) {
+    const content = document.getElementById('login-btn-content');
+    const btn     = document.getElementById('welcome-login-btn');
+    if (!content) return;
+    if (user) {
+      content.innerHTML = user.photoURL
+        ? `<img id="login-avatar" src="${user.photoURL}" alt="">`
+        : `<span style="font-size:15px;font-weight:700;color:var(--terra)">${(user.displayName||'?')[0].toUpperCase()}</span>`;
+      if (btn) btn.title = `Ingelogd als ${user.displayName || user.email}`;
+    } else {
+      content.textContent = '👤';
+      if (btn) btn.title = 'Inloggen';
+    }
+  }
+
+  async function _syncUser(user) {
+    try {
+      const ref = _db.collection('users').doc(user.uid);
+      const snap = await ref.get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (data.favs  && data.favs.length)  localStorage.setItem('dateivety_favs',    JSON.stringify(data.favs));
+        if (data.ratings && Object.keys(data.ratings).length) localStorage.setItem('dateivety_ratings', JSON.stringify(data.ratings));
+        App.init();
+        ref.update({ lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
+      } else {
+        ref.set({
+          displayName: user.displayName,
+          email:       user.email,
+          photoURL:    user.photoURL,
+          createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+          lastSeen:    firebase.firestore.FieldValue.serverTimestamp(),
+          quizHistory: [],
+          favs:        [],
+          ratings:     {}
+        });
+      }
+    } catch(e) { console.error('Firebase sync:', e); }
+  }
+
+  return {
+    loginOrLogout() {
+      if (currentUser) {
+        if (confirm(`Uitloggen als ${currentUser.displayName || currentUser.email}?`)) _auth.signOut();
+      } else {
+        _auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+          .catch(e => console.error('Login fout:', e));
+      }
+    },
+    saveQuiz(ans, results) {
+      if (!currentUser) return;
+      _db.collection('users').doc(currentUser.uid).update({
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+        quizHistory: firebase.firestore.FieldValue.arrayUnion({
+          ts:        new Date().toISOString(),
+          vibe:      ans.vibe,
+          intensity: ans.intensity,
+          duration:  ans.duration,
+          budget:    ans.budget,
+          resultIds: results.slice(0,5).map(r => r.id)
+        })
+      }).catch(e => console.error('saveQuiz:', e));
+    },
+    saveFavs(ids) {
+      if (!currentUser) return;
+      _db.collection('users').doc(currentUser.uid).update({ favs: ids })
+        .catch(e => console.error('saveFavs:', e));
+    },
+    saveRatings(ratings) {
+      if (!currentUser) return;
+      _db.collection('users').doc(currentUser.uid).update({ ratings })
+        .catch(e => console.error('saveRatings:', e));
+    },
+    getUser() { return currentUser; }
+  };
+})();
 </script>
 </body>
 </html>
