@@ -834,13 +834,18 @@
       font-size: 30px; font-weight: 700;
       color: var(--brown-dark); margin-bottom: 10px;
     }
-    .name-sub { font-size: 15px; color: var(--brown-mid); margin-bottom: 32px; max-width: 260px; }
+    .name-sub { font-size: 15px; color: var(--brown-mid); margin-bottom: 20px; max-width: 260px; }
+    .name-label {
+      font-size: 13px; font-weight: 600; color: var(--brown-mid);
+      text-transform: uppercase; letter-spacing: .06em;
+      align-self: flex-start; margin-bottom: 6px; margin-top: 4px;
+    }
     .name-input {
       width: 100%; background: var(--card-bg);
       border: 2px solid var(--border); border-radius: 16px;
-      padding: 16px 20px; font-size: 18px;
+      padding: 14px 20px; font-size: 18px;
       font-family: 'Inter', sans-serif; color: var(--brown-dark);
-      text-align: center; margin-bottom: 20px;
+      text-align: center; margin-bottom: 16px;
       outline: none; transition: border-color .18s;
     }
     .name-input:focus { border-color: var(--terra); }
@@ -983,10 +988,15 @@
 <!-- ── NAAM INVOER (eerste keer) ── -->
 <div id="screen-name" class="screen">
   <span class="name-icon">👋</span>
-  <h1 class="name-title">Hoe heet jij?</h1>
-  <p class="name-sub">Zodat ik je persoonlijk kan aanspreken.</p>
-  <input type="text" id="name-input" class="name-input" placeholder="Jouw voornaam…" maxlength="24" autocomplete="off"
-    oninput="App.onNameInput(this.value)"
+  <h1 class="name-title">Even kennismaken!</h1>
+  <p class="name-sub">Zodat we jullie de beste suggesties kunnen doen.</p>
+  <label class="name-label">Jouw voornaam</label>
+  <input type="text" id="name-input" class="name-input" placeholder="Voornaam…" maxlength="24" autocomplete="off"
+    oninput="App.onNameInput()"
+    onkeydown="if(event.key==='Enter')document.getElementById('age-input').focus()">
+  <label class="name-label">Jouw leeftijd</label>
+  <input type="number" id="age-input" class="name-input" placeholder="Leeftijd…" min="16" max="99" autocomplete="off"
+    oninput="App.onNameInput()"
     onkeydown="if(event.key==='Enter')App.saveName()">
   <button class="btn-start" id="btn-name" style="opacity:.45;pointer-events:none" onclick="App.saveName()">Verder →</button>
 </div>
@@ -2085,6 +2095,9 @@ const Profile = (() => {
     get name()    { return d.name || ''; },
     setName(v)    { d.name = v.trim(); save(); },
     hasName()     { return !!(d.name && d.name.trim()); },
+    get age()     { return d.age || null; },
+    setAge(v)     { d.age = parseInt(v, 10); save(); },
+    hasAge()      { return !!(d.age && d.age > 0); },
   };
 })();
 
@@ -2531,21 +2544,23 @@ const App = (() => {
       renderOpts('q1-list', Q1, 'vibe', 2);
       show('screen-q1');
     },
-    onNameInput(val) {
+    onNameInput() {
       const btn = document.getElementById('btn-name');
       if (!btn) return;
-      const ok = val.trim().length > 0;
+      const name = (document.getElementById('name-input') || {}).value || '';
+      const age = (document.getElementById('age-input') || {}).value || '';
+      const ok = name.trim().length > 0 && parseInt(age) >= 16 && parseInt(age) <= 99;
       btn.style.opacity = ok ? '1' : '.45';
       btn.style.pointerEvents = ok ? 'auto' : 'none';
     },
     saveName() {
       const val = (document.getElementById('name-input') || {}).value || '';
-      if (!val.trim()) return;
+      const ageVal = (document.getElementById('age-input') || {}).value || '';
+      if (!val.trim() || !ageVal || parseInt(ageVal) < 16) return;
       Profile.setName(val);
+      Profile.setAge(ageVal);
       updateGreeting();
-      ans = { vibe:[], intensity:null, duration:null, budget:null };
-      renderOpts('q1-list', Q1, 'vibe', 2);
-      show('screen-q1');
+      show('screen-welcome');
     },
     pickWhen(v) {
       selectedWhen = v;
@@ -2710,6 +2725,7 @@ const App = (() => {
     init() {
       updateBadges();
       updateGreeting();
+      if (!Profile.hasName()) { show('screen-name'); }
     }
   };
 })();
@@ -2848,7 +2864,7 @@ const FirebaseAuth = (() => {
         App.init();
         ref.update({ lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
       } else {
-        await ref.set({
+        const newUserData = {
           displayName: user.displayName,
           email:       user.email,
           photoURL:    user.photoURL,
@@ -2857,7 +2873,9 @@ const FirebaseAuth = (() => {
           quizHistory: [],
           favs:        [],
           ratings:     {}
-        });
+        };
+        if (Profile.hasAge()) newUserData.age = Profile.age;
+        await ref.set(newUserData);
       }
       // Notificatie-toestemming vragen en token opslaan
       _setupMessaging(user, ref);
