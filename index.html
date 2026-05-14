@@ -2794,18 +2794,13 @@ let   _messaging = null;
 const VAPID_KEY  = 'BA2AVd_B0WKpdjTnqD1lgfO1ndVcwuVuPrq3icfKF6DGRKE546GlRFV9Mm32wyGGMsf_GWC8vtdar1NpQ7XzWxE';
 
 // Service worker registreren voor push-meldingen
-let _swReady = false;
+let _swRegistration = null;
 let _pendingMsgUser = null, _pendingMsgRef = null;
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/Dateivety/firebase-messaging-sw.js')
     .then(reg => {
-      try {
-        _messaging = firebase.messaging();
-        _messaging.useServiceWorker(reg);
-      } catch(e) {
-        _messaging = firebase.messaging();
-      }
-      _swReady = true;
+      _swRegistration = reg;
+      _messaging = firebase.messaging();
       if (_pendingMsgUser) {
         _setupMessaging(_pendingMsgUser, _pendingMsgRef);
         _pendingMsgUser = null; _pendingMsgRef = null;
@@ -2870,7 +2865,7 @@ const FirebaseAuth = (() => {
   }
 
   async function _setupMessaging(user, ref) {
-    if (!_messaging || !_swReady) {
+    if (!_messaging) {
       _pendingMsgUser = user;
       _pendingMsgRef  = ref;
       return;
@@ -2878,7 +2873,9 @@ const FirebaseAuth = (() => {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
-      const token = await _messaging.getToken({ vapidKey: VAPID_KEY });
+      const tokenOptions = { vapidKey: VAPID_KEY };
+      if (_swRegistration) tokenOptions.serviceWorkerRegistration = _swRegistration;
+      const token = await _messaging.getToken(tokenOptions);
       if (token) {
         ref.update({ fcmToken: token, notificationsEnabled: true }).catch(() => {});
       }
@@ -2925,19 +2922,27 @@ const FirebaseAuth = (() => {
       if (!currentUser) return;
       try {
         const permission = await Notification.requestPermission();
-        const notifBtn = document.getElementById('notif-btn');
         if (permission !== 'granted') {
           alert('Meldingen zijn geblokkeerd. Sta meldingen toe via de adresbalk en probeer opnieuw.');
           return;
         }
-        if (notifBtn) notifBtn.style.display = 'none';
-        if (!_messaging) { alert('Meldingen worden zo ingeschakeld, probeer het over een moment opnieuw.'); return; }
-        const token = await _messaging.getToken({ vapidKey: VAPID_KEY });
+        if (!_messaging) {
+          alert('Meldingen worden zo ingeschakeld — probeer het over een moment opnieuw.');
+          return;
+        }
+        const tokenOptions = { vapidKey: VAPID_KEY };
+        if (_swRegistration) tokenOptions.serviceWorkerRegistration = _swRegistration;
+        const token = await _messaging.getToken(tokenOptions);
         if (token) {
           await _db.collection('users').doc(currentUser.uid).update({ fcmToken: token, notificationsEnabled: true });
+          const notifBtn = document.getElementById('notif-btn');
+          if (notifBtn) notifBtn.style.display = 'none';
           alert('✅ Meldingen zijn ingeschakeld!');
         }
-      } catch(e) { console.error('enableNotifications:', e); }
+      } catch(e) {
+        console.error('enableNotifications:', e);
+        alert('Fout: ' + e.message);
+      }
     },
     getUser() { return currentUser; }
   };
