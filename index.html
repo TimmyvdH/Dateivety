@@ -757,6 +757,10 @@
     .dash-vibe-count { font-size: 13px; color: var(--brown-mid); }
     .dash-vibe-bar-bg { background: var(--peach-light); border-radius: 99px; height: 8px; }
     .dash-vibe-bar { background: var(--terra); border-radius: 99px; height: 8px; transition: width .4s; }
+    .dash-ages-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .dash-age-chip { background: #fff; border-radius: 12px; padding: 10px 16px; text-align: center; box-shadow: 0 2px 8px rgba(44,26,14,.06); min-width: 64px; }
+    .dash-age-num { display: block; font-size: 22px; font-weight: 700; color: var(--terra); font-family: 'Playfair Display', serif; }
+    .dash-age-count { display: block; font-size: 12px; color: var(--brown-mid); margin-top: 2px; }
 
     /* Login knop welkomstscherm */
     .welcome-login-btn {
@@ -1000,8 +1004,8 @@
   <input type="text" id="name-input" class="name-input" placeholder="Voornaam…" maxlength="24" autocomplete="off"
     oninput="App.onNameInput()"
     onkeydown="if(event.key==='Enter')document.getElementById('age-input').focus()">
-  <label class="name-label">Jouw leeftijd</label>
-  <input type="number" id="age-input" class="name-input" placeholder="Leeftijd…" min="16" max="99" autocomplete="off"
+  <label class="name-label">Jouw geboortejaar</label>
+  <input type="number" id="age-input" class="name-input" placeholder="bijv. 1995" min="1920" max="2010" autocomplete="off"
     oninput="App.onNameInput()"
     onkeydown="if(event.key==='Enter')App.saveName()">
   <button class="btn-start" id="btn-name" style="opacity:.45;pointer-events:none" onclick="App.saveName()">Verder →</button>
@@ -1162,6 +1166,8 @@
     </div>
     <div class="dash-section-title">🎭 Meest gekozen vibes</div>
     <div id="dash-vibes-list"></div>
+    <div class="dash-section-title">🎂 Leeftijdsverdeling</div>
+    <div id="dash-ages-list"></div>
     <div class="dash-section-title">🏆 Populairste activiteiten</div>
     <div id="dash-activities-list"></div>
   </div>
@@ -2557,17 +2563,19 @@ const App = (() => {
       const btn = document.getElementById('btn-name');
       if (!btn) return;
       const name = (document.getElementById('name-input') || {}).value || '';
-      const age = (document.getElementById('age-input') || {}).value || '';
-      const ok = name.trim().length > 0 && parseInt(age) >= 16 && parseInt(age) <= 99;
+      const year = parseInt((document.getElementById('age-input') || {}).value || '');
+      const currentYear = new Date().getFullYear();
+      const ok = name.trim().length > 0 && year >= 1920 && year <= currentYear - 16;
       btn.style.opacity = ok ? '1' : '.45';
       btn.style.pointerEvents = ok ? 'auto' : 'none';
     },
     saveName() {
       const val = (document.getElementById('name-input') || {}).value || '';
-      const ageVal = (document.getElementById('age-input') || {}).value || '';
-      if (!val.trim() || !ageVal || parseInt(ageVal) < 16) return;
+      const yearVal = (document.getElementById('age-input') || {}).value || '';
+      const currentYear = new Date().getFullYear();
+      if (!val.trim() || !yearVal || parseInt(yearVal) > currentYear - 16) return;
       Profile.setName(val);
-      Profile.setAge(ageVal);
+      Profile.setAge(yearVal);
       updateGreeting();
       show('screen-welcome');
     },
@@ -2797,6 +2805,27 @@ const Dashboard = (() => {
         }).join('');
       }
 
+      // ── Leeftijdsverdeling ──
+      const currentYear = new Date().getFullYear();
+      const ageCounts = {};
+      users.forEach(u => {
+        const by = parseInt(u.birthYear || u.age);
+        if (isNaN(by)) return;
+        const age = by > 1900 ? currentYear - by : by; // birthYear → leeftijd, of oude age-waarde
+        ageCounts[age] = (ageCounts[age] || 0) + 1;
+      });
+      const agesEl = document.getElementById('dash-ages-list');
+      const ageEntries = Object.entries(ageCounts).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+      if (!ageEntries.length) {
+        agesEl.innerHTML = '<div class="dash-loading">Nog geen leeftijdsdata beschikbaar.</div>';
+      } else {
+        agesEl.innerHTML = `<div class="dash-ages-grid">${
+          ageEntries.map(([age, count]) =>
+            `<div class="dash-age-chip"><span class="dash-age-num">${age}</span><span class="dash-age-count">${count}x</span></div>`
+          ).join('')
+        }</div>`;
+      }
+
       // ── Activiteiten populariteit tellen ──
       const scores = {};
       users.forEach(u => {
@@ -2921,7 +2950,7 @@ const FirebaseAuth = (() => {
           favs:        [],
           ratings:     {}
         };
-        if (Profile.hasAge()) newUserData.age = Profile.age;
+        if (Profile.hasAge()) newUserData.birthYear = Profile.age;
         await ref.set(newUserData);
       }
       // Notificatie-toestemming vragen en token opslaan
