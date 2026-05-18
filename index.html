@@ -917,6 +917,38 @@
     .weather-banner.show { display: flex; }
     .tag-rain { background: #D1EDFF !important; color: #1A4A7A !important; }
 
+    /* ── Datum-highlight sectie ── */
+    .date-hl-banner {
+      background: linear-gradient(135deg, #FFF8EE, #FFE8C8);
+      border: 1.5px solid #F5C882;
+      border-radius: 16px;
+      padding: 14px 18px 12px;
+      margin-bottom: 10px;
+    }
+    .date-hl-banner-title {
+      font-weight: 700; font-size: 15px; color: #C05000;
+      display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+    }
+    .date-hl-banner-sub {
+      font-size: 12px; color: #8B4513; line-height: 1.45;
+    }
+    .date-hl-card { border-color: #F5C882 !important; }
+    .date-hl-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #FFF0D0; color: #C05000;
+      border: 1px solid #F5C882; border-radius: 100px;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 10px; margin-bottom: 8px;
+    }
+    .date-results-divider {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; font-weight: 600; color: var(--brown-light);
+      margin: 18px 0 12px;
+    }
+    .date-results-divider::before, .date-results-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
     /* ══════════════════════════════
        MODAL — MAPS + BEOORDELING
     ══════════════════════════════ */
@@ -2183,9 +2215,10 @@ const App = (() => {
   let modalActivity  = null;
   let surpriseMode   = false;
   let shownIds       = [];
-  let currentResults = [];
-  let currentSort    = 'default';
-  let currentSortDir = 'asc';
+  let currentResults       = [];
+  let currentDateHighlights = [];
+  let currentSort          = 'default';
+  let currentSortDir       = 'asc';
 
   /* Helpers */
   function show(id) {
@@ -2416,7 +2449,17 @@ const App = (() => {
       );
       out.push(...fallback.slice(0, 12 - out.length));
     }
-    return out;
+
+    // Datum-highlights: activiteiten met datums die matchen maar niet in de sfeer-resultaten zitten
+    let dateHighlights = [];
+    if (selectedWhen !== 'any' && typeof selectedWhen === 'object') {
+      dateHighlights = ACTIVITIES.filter(a =>
+        a.datums !== undefined &&
+        eventDateMatch(a.datums, selectedWhen) &&
+        !out.find(r => r.id === a.id)
+      );
+    }
+    return { regular: out, dateHighlights };
   }
 
   /* Render results */
@@ -2444,18 +2487,38 @@ const App = (() => {
     return copy;
   }
 
-  function renderCards(list) {
+  function renderCards(list, dateHighlights) {
     const body = document.getElementById('results-body');
     body.innerHTML = '';
-    if (!list.length) {
+
+    // Datum-highlights bovenaan
+    if (dateHighlights && dateHighlights.length > 0) {
+      const datumLabel = typeof selectedWhen === 'object' ? selectedWhen.label : '';
+      const banner = document.createElement('div');
+      banner.className = 'date-hl-banner';
+      banner.innerHTML = `
+        <div class="date-hl-banner-title">📅 Speelt op deze dag in Eindhoven</div>
+        <div class="date-hl-banner-sub">Dit evenement past niet bij jouw gekozen sfeer, maar vindt op ${datumLabel} wel plaats.</div>`;
+      body.appendChild(banner);
+      dateHighlights.forEach(a => body.appendChild(makeCard(a, 'dateHighlight')));
+      if (list.length > 0) {
+        const div = document.createElement('div');
+        div.className = 'date-results-divider';
+        div.innerHTML = `<span>Jullie sfeer-resultaten</span>`;
+        body.appendChild(div);
+      }
+    }
+
+    if (!list.length && (!dateHighlights || !dateHighlights.length)) {
       body.innerHTML = `<div class="no-results"><div class="no-results-icon">😅</div><div class="no-results-title">Geen resultaten</div><p class="no-results-text">Probeer je filters wat ruimer in te stellen.</p></div>`;
       return;
     }
     sortedList(list, currentSort).forEach(a => body.appendChild(makeCard(a)));
   }
 
-  function renderResults(list) {
-    currentResults = list;
+  function renderResults({ regular, dateHighlights }) {
+    currentResults = regular;
+    currentDateHighlights = dateHighlights || [];
     currentSort = 'default';
     currentSortDir = 'asc';
     document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
@@ -2473,10 +2536,10 @@ const App = (() => {
       ? `Hé ${Profile.name}, hier zijn jullie ideeën! 🎉`
       : `Jullie date-ideeën 🎉`;
     sub.textContent = `Op basis van: ${vibeNames}`;
-    badge.textContent = `${list.length} date-ideeën gevonden ✨`;
+    badge.textContent = `${regular.length} date-ideeën gevonden ✨`;
     const banner = document.getElementById('weather-banner');
     if (banner) banner.classList.toggle('show', weatherRain);
-    renderCards(list);
+    renderCards(regular, dateHighlights || []);
   }
 
   const priceLabel = { '0-15':'0 – €15', '15-40':'€15 – €40', '40-100':'€40 – €100', '100+':'€100+' };
@@ -2486,7 +2549,7 @@ const App = (() => {
 
   function makeCard(a, context) {
     const div = document.createElement('div');
-    div.className = 'a-card';
+    div.className = 'a-card' + (context === 'dateHighlight' ? ' date-hl-card' : '');
     div.dataset.id = a.id;
     const isFav  = Favs.has(a.id);
     const stars  = Ratings.get(a.id);
@@ -2494,6 +2557,8 @@ const App = (() => {
       ? '<span class="tag tag-rain">🌧️ Buiten</span>' : '';
     const starsHtml = stars > 0
       ? `<div class="card-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5 - stars)}<span style="font-size:11px;color:var(--brown-light);margin-left:5px">Jullie beoordeling</span></div>` : '';
+    const dateHlTag = context === 'dateHighlight'
+      ? '<div class="date-hl-tag">📅 Speelt op deze dag</div>' : '';
     div.innerHTML = `
       <button class="fav-btn ${isFav ? 'on' : ''}" data-id="${a.id}" title="${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}">
         ${isFav ? '❤️' : '🤍'}
@@ -2508,6 +2573,7 @@ const App = (() => {
           <div class="card-type">${a.type}</div>
         </div>
       </div>
+      ${dateHlTag}
       <p class="card-desc">${a.desc}</p>
       <div class="card-tags">
         <span class="tag tag-gold">💰 ${priceLabel[a.price]}</span>
@@ -2838,7 +2904,7 @@ const App = (() => {
         renderResults(results);
         show('screen-results');
         updateBadges();
-        FirebaseAuth.saveQuiz(ans, results);
+        FirebaseAuth.saveQuiz(ans, results.regular);
       }, 1600);
     },
     back(target) {
@@ -2858,7 +2924,7 @@ const App = (() => {
         if (mode === 'price') pill.textContent = 'Prijs ' + (currentSortDir === 'asc' ? '↑' : '↓');
         if (mode === 'dur')   pill.textContent = 'Duur '  + (currentSortDir === 'asc' ? '↑' : '↓');
       }
-      renderCards(currentResults);
+      renderCards(currentResults, currentDateHighlights);
     },
     restart() {
       updateBadges();
