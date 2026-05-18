@@ -917,6 +917,17 @@
     .weather-banner.show { display: flex; }
     .tag-rain { background: #D1EDFF !important; color: #1A4A7A !important; }
 
+    /* ── Surprise datum-banner in modal ── */
+    .m-surprise-date-banner {
+      background: linear-gradient(135deg, #FFF8EE, #FFE8C8);
+      border: 1.5px solid #F5C882;
+      border-radius: 12px;
+      padding: 11px 16px;
+      margin: 0 0 14px;
+      font-size: 14px; color: #C05000; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+
     /* ── Datum-highlight sectie ── */
     .date-hl-banner {
       background: linear-gradient(135deg, #FFF8EE, #FFE8C8);
@@ -1243,6 +1254,7 @@
       <button class="btn-fav-modal" id="m-fav-btn" onclick="App.toggleFavFromModal()">🤍</button>
     </div>
     <p  class="modal-desc"   id="m-desc"></p>
+    <div class="m-surprise-date-banner" id="m-surprise-date" style="display:none"></div>
     <div class="modal-grid"  id="m-grid"></div>
     <div class="modal-actions">
       <a class="modal-action-btn" id="m-maps-btn" href="#" target="_blank" rel="noopener">
@@ -2379,6 +2391,38 @@ const App = (() => {
     return true; // dag niet gevonden in data → aannemen open
   }
 
+  function datumNearbyInfo(datums) {
+    const now = new Date(); now.setHours(0,0,0,0);
+    const limit = new Date(now); limit.setDate(now.getDate() + 14);
+    const mnd = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+    function parse(s) { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+    function inWin(d) { return d>=now && d<=limit; }
+    function fmt(d) { return `${d.getDate()} ${mnd[d.getMonth()]}`; }
+    if (datums==='3e_zondag') {
+      for (let mo=0;mo<=1;mo++) {
+        const yr=now.getFullYear(), month=now.getMonth()+mo;
+        const fd=new Date(yr,month,1).getDay(), fs=fd===0?1:8-fd;
+        const sun=new Date(yr,month,fs+14);
+        if(inWin(sun)) return {nearby:true, label:`zondag ${fmt(sun)}`};
+      }
+      return {nearby:false};
+    }
+    if (Array.isArray(datums)) {
+      for (const d of datums) { const dt=parse(d); if(inWin(dt)) return {nearby:true,label:fmt(dt)}; }
+      return {nearby:false};
+    }
+    if (datums.includes('/')) {
+      const [s,e]=datums.split('/').map(parse);
+      if (s<=limit && e>=now) {
+        if (s>=now) return {nearby:true, label:`${fmt(s)} t/m ${fmt(e)}`};
+        return {nearby:true, label:`nog t/m ${fmt(e)}`};
+      }
+      return {nearby:false};
+    }
+    const dt=parse(datums);
+    return inWin(dt) ? {nearby:true,label:fmt(dt)} : {nearby:false};
+  }
+
   function match() {
     const month = new Date().getMonth(); // 0=jan … 11=dec
     const isWinter = month <= 1 || month >= 10;
@@ -2667,6 +2711,15 @@ const App = (() => {
     syncModalFavBtn();
     syncModalRating();
     syncModalLocations();
+    // Surprise datum-banner
+    const sdb = document.getElementById('m-surprise-date');
+    if (surpriseMode && a.datums) {
+      const info = datumNearbyInfo(a.datums);
+      if (info.nearby) {
+        sdb.innerHTML = `📅 Speelt op <strong>${info.label}</strong> in Eindhoven`;
+        sdb.style.display = 'flex';
+      } else { sdb.style.display = 'none'; }
+    } else { sdb.style.display = 'none'; }
     document.getElementById('modal-bg').classList.add('open');
   }
 
@@ -2814,14 +2867,16 @@ const App = (() => {
     surprise() {
       surpriseMode = true;
       shownIds = [];
-      const a = ACTIVITIES[Math.floor(Math.random() * ACTIVITIES.length)];
+      const pool = ACTIVITIES.filter(a => !a.datums || datumNearbyInfo(a.datums).nearby);
+      const a = pool[Math.floor(Math.random() * pool.length)];
       shownIds.push(a.id);
       openModal(a);
       document.getElementById('btn-next-surprise').style.display = 'block';
     },
     nextSurprise() {
-      var pool = ACTIVITIES.filter(a => !shownIds.includes(a.id));
-      if (!pool.length) { shownIds = []; pool = ACTIVITIES.slice(); }
+      const base = ACTIVITIES.filter(a => !a.datums || datumNearbyInfo(a.datums).nearby);
+      var pool = base.filter(a => !shownIds.includes(a.id));
+      if (!pool.length) { shownIds = []; pool = base.slice(); }
       const a = pool[Math.floor(Math.random() * pool.length)];
       shownIds.push(a.id);
       openModal(a);
