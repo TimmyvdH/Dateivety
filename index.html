@@ -2275,10 +2275,28 @@ const App = (() => {
     }
     return false;
   }
-  function isOpenAt(hoursStr, dayOfWeek, timeStr) {
+  function isOpenAt(hoursStr, dayOfWeek, timeStr, month) {
     if (!hoursStr || hoursStr === 'niet_gevonden') return true;
     const s = hoursStr.toLowerCase();
     if (s.includes('24 uur') || s.includes('altijd') || s.includes('geen openingstijden')) return true;
+    if (s.includes('geen locatie') || s.includes('thuis activiteit')) return true;
+
+    // Seizoensgebonden check: als er maandnamen in de openingstijden staan,
+    // alleen tonen als de gezochte maand overeenkomt
+    if (month !== undefined) {
+      const maandNrs = {
+        'januari':0,'februari':1,'maart':2,'april':3,'mei':4,'juni':5,
+        'juli':6,'augustus':7,'september':8,'oktober':9,'november':10,'december':11
+      };
+      const heeftMaand = Object.keys(maandNrs).some(m => s.includes(m));
+      if (heeftMaand) {
+        const matchedMonths = Object.entries(maandNrs)
+          .filter(([naam]) => s.includes(naam))
+          .map(([, nr]) => nr);
+        return matchedMonths.includes(month);
+      }
+    }
+
     if (s.includes('op aanvraag') || s.includes('op afspraak') || s.includes('evenement')) return true;
     if (s.includes('geen locatie') || s.includes('thuis activiteit')) return true;
     const dayName = ['zo','ma','di','wo','do','vr','za'][dayOfWeek];
@@ -2335,7 +2353,7 @@ const App = (() => {
       } else s += 3;
       // Openingstijden — hard filter op specifieke datum/tijd
       if (selectedWhen !== 'any' && typeof selectedWhen === 'object') {
-        if (!isOpenAt(a.hours, selectedWhen.day, selectedWhen.time)) return null;
+        if (!isOpenAt(a.hours, selectedWhen.day, selectedWhen.time, selectedWhen.month)) return null;
         // Tijdstip scoring op basis van gekozen tijd
         const t = ACTIVITY_TIMES[a.id] || 'altijd';
         const h = parseInt(selectedWhen.time);
@@ -2700,7 +2718,7 @@ const App = (() => {
       const dayName = days[d.getDay()];
       const dateStr = `${d.getDate()} ${months[d.getMonth()]}`;
       if (label) label.textContent = `${dayName.charAt(0).toUpperCase()+dayName.slice(1)} ${dateStr} om ${timeVal}`;
-      selectedWhen = { day: d.getDay(), time: timeVal, label: `${dayName} ${dateStr} ${timeVal}` };
+      selectedWhen = { day: d.getDay(), month: d.getMonth(), time: timeVal, label: `${dayName} ${dateStr} ${timeVal}` };
     },
     surprise() {
       surpriseMode = true;
