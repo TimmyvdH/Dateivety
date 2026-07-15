@@ -42,6 +42,10 @@
       font-family: 'Inter', sans-serif;
       color: var(--brown-dark);
       overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+    .q-header, .results-header, .opt, .p-seg, .p-seg.on, .btn-primary, .card {
+      transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease !important;
     }
 
     /* ── Layout ── */
@@ -2392,6 +2396,14 @@ const App = (() => {
     r.style.setProperty('--rose',        p.rose);
     r.style.setProperty('--card-bg',     p.cardBg);
     r.style.setProperty('--border',      p.border);
+    document.body.style.background = p.cream;
+    document.body.style.color = p.brownDark;
+    document.querySelectorAll('.q-header').forEach(el => {
+      el.style.background = `linear-gradient(160deg, ${p.peach} 0%, ${p.cream} 100%)`;
+    });
+    document.querySelectorAll('.results-header').forEach(el => {
+      el.style.background = `linear-gradient(160deg, ${p.peach} 0%, ${p.cream} 100%)`;
+    });
     const welcome = document.getElementById('screen-welcome');
     if (welcome) welcome.style.background = `linear-gradient(160deg, ${p.cream} 0%, ${p.peach} 55%, ${p.rose} 100%)`;
   }
