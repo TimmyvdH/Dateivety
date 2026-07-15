@@ -2566,18 +2566,25 @@ const App = (() => {
       return { a, s };
     }).filter(Boolean).sort((x,y) => y.s - x.s);
 
-    // Variety: max 2 per type
+    // Variety: max 2 per type, max 1 per URL (zelfde locatie niet dubbel tonen)
     const typeCnt = {};
+    const seenUrls = new Set();
     const out = [];
     for (const item of scored) {
+      const url = (item.a.url || '').trim().toLowerCase();
+      if (url && seenUrls.has(url)) continue; // zelfde locatie, overslaan
       typeCnt[item.a.type] = (typeCnt[item.a.type] || 0) + 1;
-      if (typeCnt[item.a.type] <= 2) out.push(item.a);
+      if (typeCnt[item.a.type] <= 2) {
+        out.push(item.a);
+        if (url) seenUrls.add(url);
+      }
       if (out.length >= 12) break;
     }
     // Fallback: respecteer alle harde filters
     if (out.length < 5) {
       const fallback = ACTIVITIES.filter(a =>
         !out.find(r => r.id === a.id) &&
+        !((a.url || '').trim().toLowerCase() !== '' && seenUrls.has((a.url || '').trim().toLowerCase())) &&
         !((a.datums !== undefined || a.cats.includes('seizoensgebonden')) && (selectedWhen === 'any' || typeof selectedWhen !== 'object')) &&
         ans.vibe.some(v => a.cats.includes(v)) &&
         (ans.duration === 'any' || a.dur === ans.duration) &&
