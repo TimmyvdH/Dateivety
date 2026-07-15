@@ -2363,6 +2363,39 @@ const App = (() => {
     });
   }
 
+  /* ── Kleurpaletten per vibe ── */
+  const PALETTES = {
+    romantisch:       { cream:'#FDF6EF', peach:'#F5E4D0', peachLight:'#FAF0E4', terra:'#C0572A', terraDark:'#8B3A1C', terraLight:'#E89070', brownDark:'#2C1A0E', brownMid:'#6B3A1C', brownLight:'#A05030', rose:'#F5C4A0', cardBg:'#FFFAF5', border:'#EDD5BA' },
+    avontuurlijk:     { cream:'#F3F8F3', peach:'#D5EDD8', peachLight:'#EAF5EA', terra:'#2D7A4F', terraDark:'#1A5235', terraLight:'#4D9A6F', brownDark:'#0D2B1C', brownMid:'#1A5235', brownLight:'#2D7A4F', rose:'#C8E8D0', cardBg:'#F9FDF9', border:'#C4DBC4' },
+    ontspannend:      { cream:'#F3F8F3', peach:'#D5EDD8', peachLight:'#EAF5EA', terra:'#2D7A4F', terraDark:'#1A5235', terraLight:'#4D9A6F', brownDark:'#0D2B1C', brownMid:'#1A5235', brownLight:'#2D7A4F', rose:'#C8E8D0', cardBg:'#F9FDF9', border:'#C4DBC4' },
+    intiem:           { cream:'#FBF0F5', peach:'#F5D0E0', peachLight:'#FAE8F0', terra:'#C0355A', terraDark:'#8B1A3A', terraLight:'#D96090', brownDark:'#3A0F1E', brownMid:'#8B1A3A', brownLight:'#B03060', rose:'#F5B0D0', cardBg:'#FFF5FA', border:'#EDB8D0' },
+    competitief:      { cream:'#FDF2F2', peach:'#F5C8C8', peachLight:'#FAE0E0', terra:'#C02020', terraDark:'#8B1010', terraLight:'#D95050', brownDark:'#3A0808', brownMid:'#8B1010', brownLight:'#B03030', rose:'#F5A0A0', cardBg:'#FFF5F5', border:'#EDB8B8' },
+    seizoensgebonden: { cream:'#F7F3F8', peach:'#EDD8F5', peachLight:'#F3ECF9', terra:'#7B4F9E', terraDark:'#5C3479', terraLight:'#9B70BC', brownDark:'#2A1540', brownMid:'#5C3479', brownLight:'#8060A0', rose:'#E8C9F5', cardBg:'#FDFAFF', border:'#DDD0E8' },
+    verbindend:       { cream:'#F7F3F8', peach:'#EDD8F5', peachLight:'#F3ECF9', terra:'#7B4F9E', terraDark:'#5C3479', terraLight:'#9B70BC', brownDark:'#2A1540', brownMid:'#5C3479', brownLight:'#8060A0', rose:'#E8C9F5', cardBg:'#FDFAFF', border:'#DDD0E8' },
+    creatief:         { cream:'#FEFCEE', peach:'#F5F0B0', peachLight:'#FAFAD8', terra:'#B8A000', terraDark:'#887400', terraLight:'#D8C830', brownDark:'#2A2400', brownMid:'#605000', brownLight:'#988000', rose:'#EEE870', cardBg:'#FFFEF5', border:'#E8E090' },
+    uniek:            { cream:'#FDF6E8', peach:'#F0D89A', peachLight:'#F8ECC8', terra:'#B8860B', terraDark:'#8B6508', terraLight:'#D4A020', brownDark:'#2C1800', brownMid:'#7A4E00', brownLight:'#B07820', rose:'#E8C060', cardBg:'#FFFCE8', border:'#E0C878' },
+    sociaal:          { cream:'#FDF8EE', peach:'#F5E5C0', peachLight:'#FAF0D8', terra:'#D4860A', terraDark:'#A35E05', terraLight:'#E8A030', brownDark:'#3D2000', brownMid:'#8B5A00', brownLight:'#C07A10', rose:'#F5CF7A', cardBg:'#FFFDF5', border:'#EDD9A3' },
+  };
+
+  function applyPalette(vibe) {
+    const p = PALETTES[vibe] || PALETTES['romantisch'];
+    const r = document.documentElement;
+    r.style.setProperty('--cream',       p.cream);
+    r.style.setProperty('--peach',       p.peach);
+    r.style.setProperty('--peach-light', p.peachLight);
+    r.style.setProperty('--terra',       p.terra);
+    r.style.setProperty('--terra-dark',  p.terraDark);
+    r.style.setProperty('--terra-light', p.terraLight);
+    r.style.setProperty('--brown-dark',  p.brownDark);
+    r.style.setProperty('--brown-mid',   p.brownMid);
+    r.style.setProperty('--brown-light', p.brownLight);
+    r.style.setProperty('--rose',        p.rose);
+    r.style.setProperty('--card-bg',     p.cardBg);
+    r.style.setProperty('--border',      p.border);
+    const welcome = document.getElementById('screen-welcome');
+    if (welcome) welcome.style.background = `linear-gradient(160deg, ${p.cream} 0%, ${p.peach} 55%, ${p.rose} 100%)`;
+  }
+
   function pick(card, key, maxSel, listId) {
     const val = card.dataset.val;
     if (maxSel === 1) {
@@ -2378,6 +2411,10 @@ const App = (() => {
         card.classList.add('selected');
         ans[key].push(val);
       }
+    }
+    if (key === 'vibe') {
+      const activeVibe = Array.isArray(ans.vibe) ? ans.vibe[0] : ans.vibe;
+      if (activeVibe) applyPalette(activeVibe);
     }
     const btnMap = { vibe:'btn1', intensity:'btn2', duration:'btn3', budget:'btn4' };
     const btn = document.getElementById(btnMap[key]);
@@ -2909,6 +2946,7 @@ const App = (() => {
     start() {
       if (!Profile.hasName()) { show('screen-name'); return; }
       ans = { vibe:[], intensity:null, duration:null, budget:null };
+      applyPalette('romantisch');
       renderOpts('q1-list', Q1, 'vibe', 2);
       show('screen-q1');
     },
