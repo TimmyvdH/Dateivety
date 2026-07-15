@@ -2543,7 +2543,8 @@ const App = (() => {
         s += 6;
       } else s += 3;
       // Datum-gebonden evenementen alleen tonen als er een datum gekozen is
-      if (a.datums !== undefined && (selectedWhen === 'any' || typeof selectedWhen !== 'object')) return null;
+      const isDateBound = a.datums !== undefined || a.cats.includes('seizoensgebonden');
+      if (isDateBound && (selectedWhen === 'any' || typeof selectedWhen !== 'object')) return null;
       // Openingstijden — hard filter op specifieke datum/tijd
       if (selectedWhen !== 'any' && typeof selectedWhen === 'object') {
         if (a.datums !== undefined) {
@@ -2577,7 +2578,7 @@ const App = (() => {
     if (out.length < 5) {
       const fallback = ACTIVITIES.filter(a =>
         !out.find(r => r.id === a.id) &&
-        !(a.datums !== undefined && (selectedWhen === 'any' || typeof selectedWhen !== 'object')) &&
+        !((a.datums !== undefined || a.cats.includes('seizoensgebonden')) && (selectedWhen === 'any' || typeof selectedWhen !== 'object')) &&
         ans.vibe.some(v => a.cats.includes(v)) &&
         (ans.duration === 'any' || a.dur === ans.duration) &&
         (ans.budget === 'any'   || a.price === ans.budget) &&
