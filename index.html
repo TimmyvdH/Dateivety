@@ -537,7 +537,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(44,26,14,.52);
+      background: rgba(0,0,0,0.82);
       z-index: 200;
       align-items: flex-end;
       justify-content: center;
@@ -545,7 +545,9 @@
     .modal-bg.open { display: flex; }
 
     .modal {
-      background: rgba(255,255,255,0.12);
+      background: rgba(18,18,28,0.96);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
       border-radius: 28px 28px 0 0;
       padding: 20px 22px 52px;
       width: 100%;
@@ -561,7 +563,7 @@
 
     .modal-handle {
       width: 40px; height: 4px;
-      background: var(--border);
+      background: rgba(255,255,255,0.2);
       border-radius: 4px;
       margin: 0 auto 22px;
     }
@@ -607,7 +609,7 @@
     .modal-type { font-size: 12px; color: rgba(255,255,255,0.82); margin-bottom: 0; }
     .modal-desc {
       font-size: 15px;
-      color: var(--brown-mid);
+      color: rgba(255,255,255,0.75);
       line-height: 1.65;
       margin-bottom: 22px;
     }
@@ -619,7 +621,8 @@
       margin-bottom: 20px;
     }
     .m-detail {
-      background: var(--peach-light);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 14px;
       padding: 13px;
     }
@@ -628,15 +631,16 @@
       text-transform: uppercase;
       letter-spacing: 1.2px;
       font-weight: 700;
-      color: var(--brown-light);
+      color: rgba(255,255,255,0.45);
       margin-bottom: 4px;
     }
-    .m-detail-val { font-size: 15px; font-weight: 600; color: var(--brown-dark); }
+    .m-detail-val { font-size: 15px; font-weight: 600; color: white; }
 
     .modal-cats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
     .m-cat {
-      background: rgba(196,112,75,.1);
-      color: var(--terra-dark);
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
       font-size: 13px;
       font-weight: 500;
       padding: 6px 14px;
@@ -741,6 +745,7 @@
       backdrop-filter: blur(6px);
     }
     .btn-fav-modal:active { background: rgba(255,255,255,0.35); }
+    .btn-fav-modal { color: rgba(255,255,255,0.8); }
     .btn-fav-modal.on {
       background: rgba(255,80,80,0.75);
       border-color: rgba(255,80,80,0.6);
@@ -1038,16 +1043,16 @@
     .modal-action-btn {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; gap: 5px;
-      padding: 11px 6px; border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.3);
-      background: rgba(255,255,255,0.12); color: var(--brown-mid);
+      padding: 12px 6px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.10); color: white;
       font-size: 11px; font-weight: 600;
       font-family: 'DM Sans', sans-serif;
       cursor: pointer; text-decoration: none;
       transition: background .15s;
     }
-    .modal-action-btn:active { background: var(--peach-light); }
-    .modal-action-btn .action-icon { font-size: 20px; line-height: 1; }
+    .modal-action-btn:active { background: rgba(255,255,255,0.2); }
+    .modal-action-btn .action-icon { font-size: 20px; line-height: 1; color: rgba(255,255,255,0.8); }
     .modal-action-whatsapp {
       background: #25D366; border-color: #25D366; color: #fff;
     }
@@ -1055,13 +1060,13 @@
 
     /* ── Locaties sectie ── */
     .locations-section {
-      background: var(--peach-light); border-radius: 16px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
       margin-bottom: 10px; overflow: hidden;
     }
     .locations-header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 13px 16px; cursor: pointer; user-select: none;
-      font-weight: 600; font-size: 14px; color: var(--brown-mid);
+      font-weight: 600; font-size: 14px; color: white;
     }
     .locations-header:active { background: rgba(0,0,0,.04); }
     .locations-arrow { transition: transform .2s; font-size: 11px; }
@@ -1078,10 +1083,10 @@
     .location-pin { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
     .location-info { flex: 1; }
     .location-name {
-      font-size: 14px; font-weight: 600; color: var(--brown-dark);
+      font-size: 14px; font-weight: 600; color: white;
       margin-bottom: 2px;
     }
-    .location-tip { font-size: 12px; color: var(--brown-mid); line-height: 1.4; }
+    .location-tip { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4; }
     .location-link {
       font-size: 12px; color: var(--terra); font-weight: 600;
       text-decoration: none; display: inline-block; margin-top: 3px;
@@ -1090,25 +1095,26 @@
       display: block; width: 100%; background: none; border: none;
       color: var(--terra); font-size: 13px; font-weight: 600;
       padding: 10px 16px; cursor: pointer; text-align: center;
-      border-top: 1px solid var(--border); font-family: 'DM Sans', sans-serif;
+      border-top: 1px solid rgba(255,255,255,0.1); font-family: 'DM Sans', sans-serif;
     }
     .btn-suggest {
       display: block; background: none; border: none;
-      color: var(--brown-light); font-size: 12px;
+      color: rgba(255,255,255,0.45); font-size: 12px;
       cursor: pointer; font-family: 'DM Sans', sans-serif;
       text-align: center; width: 100%;
       padding: 4px 0 12px; transition: color .15s;
     }
-    .btn-suggest:active { color: var(--terra); }
+    .btn-suggest:active { color: rgba(255,255,255,0.8); }
     .modal-rating {
-      background: var(--peach-light); border-radius: 16px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
       padding: 14px 16px; margin-bottom: 12px; text-align: center;
     }
-    .rating-label { font-size: 13px; color: var(--brown-mid); margin-bottom: 8px; }
+    .rating-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
     .rating-stars { display: flex; justify-content: center; gap: 4px; }
     .star-btn {
       background: none; border: none; font-size: 26px;
       cursor: pointer; padding: 2px; transition: transform .15s; line-height: 1;
+      color: rgba(255,255,255,0.5);
     }
     .star-btn:active { transform: scale(.82); }
     .card-stars { display: flex; align-items: center; gap: 1px; font-size: 13px; margin-top: 8px; }
