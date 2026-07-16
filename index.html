@@ -2464,11 +2464,15 @@ const App = (() => {
 
   function applyBgImg(url) {
     const img = document.getElementById('app-bg-img');
-    if (img) {
-      img.style.opacity = '0';
-      img.onload = () => { img.style.opacity = '1'; };
+    if (!img) return;
+    img.style.opacity = '0';
+    const newImg = new Image();
+    newImg.onload = () => {
       img.src = url;
-    }
+      img.style.display = 'block';
+      requestAnimationFrame(() => { img.style.opacity = '1'; });
+    };
+    newImg.src = url;
   }
 
   /* ── Kleurpaletten per vibe ── */
@@ -3285,6 +3289,13 @@ const App = (() => {
     init() {
       updateBadges();
       updateGreeting();
+      // Laad standaard achtergrond (binnen IIFE zodat PEXELS_KEY beschikbaar is)
+      const bgImg = document.getElementById('app-bg-img');
+      if (bgImg) {
+        bgImg.style.transition = 'opacity 1s ease';
+        bgImg.style.opacity = '0';
+      }
+      fetchVibeBg(DEFAULT_BG_QUERY);
       if (!Profile.hasName()) { show('screen-name'); }
     }
   };
@@ -3404,27 +3415,7 @@ const Dashboard = (() => {
   return { load };
 })();
 
-// Laad standaard achtergrond bij start
-document.addEventListener('DOMContentLoaded', () => {
-  const img = document.getElementById('app-bg-img');
-  if (img) {
-    img.style.transition = 'opacity 0.8s ease';
-    img.style.opacity = '0';
-  }
-  if (typeof PEXELS_KEY !== 'undefined') {
-    fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent('romantic couple date evening city lights')}&per_page=3&orientation=portrait`, {
-      headers: { Authorization: PEXELS_KEY }
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.photos && data.photos.length > 0) {
-        const url = data.photos[0].src.large2x || data.photos[0].src.large;
-        if (img) { img.onload = () => { img.style.opacity = '1'; }; img.src = url; }
-      }
-    })
-    .catch(() => {});
-  }
-});
+
 </script>
 
 <!-- ── FIREBASE ── -->
