@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="Dateivety">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,600;9..144,0,700;9..144,1,300;9..144,1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.29.0/dist/tabler-icons.min.css">
   <style>
     *, *::before, *::after {
@@ -126,7 +126,7 @@
     }
 
     .logo {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 44px;
       font-weight: 700;
       color: var(--terra-dark);
@@ -211,7 +211,7 @@
     }
 
     .q-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 30px;
       font-weight: 600;
       color: white;
@@ -298,7 +298,7 @@
 
     .btn-next {
       width: 100%;
-      background: linear-gradient(135deg, var(--terra) 0%, var(--terra-dark) 100%);
+      background: var(--terra);
       color: #fff;
       border: none;
       padding: 18px;
@@ -307,14 +307,15 @@
       font-weight: 600;
       font-family: 'DM Sans', sans-serif;
       cursor: pointer;
-      box-shadow: 0 6px 22px rgba(196,112,75,.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       transition: opacity .18s, transform .15s;
-      opacity: .45;
+      opacity: .35;
       pointer-events: none;
     }
     .btn-next.on {
       opacity: 1;
       pointer-events: auto;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
     }
     .btn-next:active { transform: scale(.98); }
 
@@ -341,7 +342,7 @@
 
     .loading-title {
       color: white !important;
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 22px;
       color: white;
       margin-bottom: 8px;
@@ -358,7 +359,7 @@
 
     .results-title { color: white !important; }
     .results-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 28px;
       font-weight: 700;
       color: white;
@@ -438,7 +439,7 @@
       object-fit: cover;
     }
     .card-name {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 21px;
       font-weight: 600;
       color: white;
@@ -490,9 +491,11 @@
       flex-shrink: 0;
       padding: 6px 14px;
       border-radius: 100px;
-      border: 1px solid rgba(255,255,255,0.25);
-      background: rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: white;
       font-size: 13px;
       font-family: 'DM Sans', sans-serif;
       font-weight: 500;
@@ -511,18 +514,21 @@
     }
     .btn-restart {
       width: 100%;
-      background: transparent;
-      border: 2px solid var(--terra);
-      color: var(--terra);
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: white;
       padding: 16px;
       border-radius: 16px;
       font-size: 16px;
       font-weight: 600;
       font-family: 'DM Sans', sans-serif;
       cursor: pointer;
-      transition: background .15s;
+      transition: background .2s;
     }
-    .btn-restart:active { background: rgba(196,112,75,.07); }
+    .btn-restart:hover { background: rgba(255,255,255,0.22); }
+    .btn-restart:active { background: rgba(255,255,255,0.25); }
 
     /* ══════════════════════════════
        MODAL
@@ -590,7 +596,7 @@
     }
     .modal-emoji { font-size: 52px; text-align: center; display: block; margin-bottom: 14px; }
     .modal-name {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 22px;
       font-weight: 700;
       color: #fff;
@@ -679,7 +685,7 @@
     }
     .no-results-icon { font-size: 52px; margin-bottom: 16px; }
     .no-results-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 22px;
       color: white;
       margin-bottom: 8px;
@@ -799,7 +805,7 @@
       box-shadow: 0 2px 12px rgba(44,26,14,.07);
     }
     .dash-label { font-size: 14px; color: var(--brown-mid); margin-bottom: 8px; }
-    .dash-number { font-size: 52px; font-weight: 700; color: var(--terra); font-family: 'Cormorant Garamond', serif; }
+    .dash-number { font-size: 52px; font-weight: 700; color: var(--terra); font-family: 'Fraunces', serif; }
     .dash-section-title { font-size: 15px; font-weight: 700; color: var(--brown-dark); margin: 4px 0 14px; }
     .dash-act-row {
       display: flex; align-items: center; gap: 12px;
@@ -818,7 +824,7 @@
     .dash-vibe-bar { background: var(--terra); border-radius: 99px; height: 8px; transition: width .4s; }
     .dash-ages-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     .dash-age-chip { background: #fff; border-radius: 12px; padding: 10px 16px; text-align: center; box-shadow: 0 2px 8px rgba(44,26,14,.06); min-width: 64px; }
-    .dash-age-num { display: block; font-size: 22px; font-weight: 700; color: var(--terra); font-family: 'Cormorant Garamond', serif; }
+    .dash-age-num { display: block; font-size: 22px; font-weight: 700; color: var(--terra); font-family: 'Fraunces', serif; }
     .dash-age-count { display: block; font-size: 12px; color: var(--brown-mid); margin-top: 2px; }
 
     /* Login knop welkomstscherm */
@@ -856,7 +862,7 @@
       line-height: 1;
     }
     .favs-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 28px;
       font-weight: 700;
       color: white;
@@ -880,7 +886,7 @@
     }
     .favs-empty-icon { font-size: 56px; margin-bottom: 18px; }
     .favs-empty-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 22px;
       color: white;
       margin-bottom: 8px;
@@ -900,7 +906,7 @@
     }
     .name-icon { font-size: 64px; margin-bottom: 20px; display: block; }
     .name-title {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Fraunces', serif;
       font-size: 30px; font-weight: 700;
       color: white; margin-bottom: 10px;
     }
@@ -966,7 +972,7 @@
       font-family: 'DM Sans', sans-serif; cursor: pointer;
       transition: all .18s; position: relative; z-index: 1;
     }
-    .btn-surprise:active { background: rgba(196,112,75,.08); }
+    .btn-surprise:active { background: rgba(255,255,255,0.25); }
 
     /* ══════════════════════════════
        WEERBANNER
