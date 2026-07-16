@@ -1053,6 +1053,7 @@
     }
     .modal-action-btn:active { background: rgba(255,255,255,0.2); }
     .modal-action-btn .action-icon { font-size: 20px; line-height: 1; color: rgba(255,255,255,0.8); }
+    .modal-action-btn svg { flex-shrink: 0; }
     .modal-action-whatsapp {
       background: #25D366; border-color: #25D366; color: #fff;
     }
@@ -1340,12 +1341,21 @@
     <div class="m-surprise-date-banner" id="m-surprise-date" style="display:none"></div>
     <div class="modal-grid"  id="m-grid"></div>
     <div class="modal-actions">
-      <a class="modal-action-btn" id="m-maps-btn" href="#" target="_blank" rel="noopener">
-        <i class="ti ti-map-pin"></i>
-        <span>Maps</span>
+      <a class="modal-action-btn" id="m-maps-btn" href="#" target="_blank" rel="noopener" style="background:white;border-color:white;color:#333">
+        <svg width="22" height="28" viewBox="0 0 40 52" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 0C9 0 0 9 0 20C0 32 20 52 20 52C20 52 40 32 40 20C40 9 31 0 20 0Z" fill="#EA4335"/>
+  <circle cx="20" cy="20" r="9" fill="white"/>
+</svg>
+        <span style="color:#333">Maps</span>
       </a>
-      <a class="modal-action-btn" id="m-website-btn" href="#" target="_blank" rel="noopener" style="display:none">
-        <i class="ti ti-world"></i>
+      <a class="modal-action-btn" id="m-website-btn" href="#" target="_blank" rel="noopener" style="display:none;background:#0096C7;border-color:#0096C7;color:white">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="9.5" stroke="white" stroke-width="1.8"/>
+  <path d="M12 2.5C12 2.5 8 7 8 12C8 17 12 21.5 12 21.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M12 2.5C12 2.5 16 7 16 12C16 17 12 21.5 12 21.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="2.5" y1="12" x2="21.5" y2="12" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M4 7.5H20M4 16.5H20" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
         <span>Website</span>
       </a>
       <button class="modal-action-btn modal-action-whatsapp" onclick="App.shareWhatsApp()">
