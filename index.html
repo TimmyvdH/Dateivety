@@ -11,7 +11,8 @@
   <meta name="apple-mobile-web-app-title" content="Dateivety">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.29.0/dist/tabler-icons.min.css">
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -36,13 +37,55 @@
       --border:       #EDD5BA;
     }
 
+
+    /* ══════════════════════════════
+       ACHTERGROND LAAG
+    ══════════════════════════════ */
+    #app-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    #app-bg-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      transition: opacity 0.8s ease;
+    }
+    #app-bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+        rgba(0,0,0,0.45) 0%,
+        rgba(0,0,0,0.35) 40%,
+        rgba(0,0,0,0.55) 100%);
+    }
+
+    /* ── Alle schermen transparant boven achtergrond ── */
+    .screen {
+      position: relative;
+      z-index: 1;
+      background: transparent !important;
+    }
+
+    /* ── Frosted glass basis ── */
+    .glass {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.22);
+    }
+
     html, body {
       height: 100%;
-      background: var(--cream);
-      font-family: 'Inter', sans-serif;
-      color: var(--brown-dark);
+      background: #1A1A2E;
+      font-family: 'DM Sans', sans-serif;
+      color: white;
       overflow-x: hidden;
-      transition: background 0.4s ease, color 0.4s ease;
+      -webkit-font-smoothing: antialiased;
     }
     .q-header, .results-header, .opt, .p-seg, .p-seg.on, .btn-primary, .card {
       transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease !important;
@@ -62,30 +105,13 @@
        WELCOME SCREEN
     ══════════════════════════════ */
     #screen-welcome {
-      background: linear-gradient(160deg, #FDF5EC 0%, #F5DFC4 55%, #EDD0AA 100%);
+      background: transparent;
       align-items: center;
       justify-content: center;
       text-align: center;
       padding: 48px 32px 64px;
       position: relative;
       overflow: hidden;
-    }
-
-    #screen-welcome::before {
-      content: '';
-      position: absolute;
-      top: -100px; right: -100px;
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(212,160,86,.18) 0%, transparent 70%);
-      border-radius: 50%;
-    }
-    #screen-welcome::after {
-      content: '';
-      position: absolute;
-      bottom: -80px; left: -80px;
-      width: 240px; height: 240px;
-      background: radial-gradient(circle, rgba(196,112,75,.14) 0%, transparent 70%);
-      border-radius: 50%;
     }
 
     .welcome-icon {
@@ -100,14 +126,14 @@
     }
 
     .logo {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 44px;
       font-weight: 700;
       color: var(--terra-dark);
       letter-spacing: -1px;
       margin-bottom: 6px;
     }
-    .logo span { color: var(--terra); }
+    .logo span { color: rgba(255,255,255,0.75); font-weight: 400; }
 
     .tagline {
       font-size: 15px;
@@ -125,7 +151,7 @@
       border-radius: 100px;
       font-size: 17px;
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       box-shadow: 0 10px 28px rgba(196,112,75,.38);
       transition: transform .15s, box-shadow .15s;
@@ -141,7 +167,7 @@
        QUESTION SCREENS
     ══════════════════════════════ */
     .q-header {
-      background: linear-gradient(160deg, var(--peach) 0%, var(--cream) 100%);
+      background: transparent;
       padding: 52px 24px 28px;
       position: relative;
     }
@@ -150,16 +176,16 @@
       top: 16px; left: 16px;
       background: none;
       border: none;
-      color: var(--brown-mid);
+      color: rgba(255,255,255,0.8);
       font-size: 14px;
       font-weight: 500;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       padding: 4px 8px;
       border-radius: 8px;
       transition: color .15s;
     }
-    .btn-back:active { color: var(--terra); }
+    .btn-back:active { color: white; }
 
     .progress-bar {
       display: flex;
@@ -168,39 +194,42 @@
     }
     .p-seg {
       flex: 1;
-      height: 4px;
+      height: 3px;
       border-radius: 4px;
-      background: var(--border);
+      background: rgba(255,255,255,0.25);
       transition: background .35s;
     }
-    .p-seg.on { background: var(--terra); }
+    .p-seg.on { background: white; }
 
     .step-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 1.8px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: var(--terra);
-      margin-bottom: 10px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 12px;
     }
 
     .q-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 30px;
       font-weight: 600;
-      color: var(--brown-dark);
-      line-height: 1.3;
+      color: white;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.3);
     }
 
     .q-body {
       flex: 1;
       padding: 20px 16px 8px;
       overflow-y: auto;
+      background: transparent;
     }
 
     .multi-hint {
       font-size: 13px;
-      color: var(--brown-light);
+      color: rgba(255,255,255,0.6);
       font-style: italic;
       margin-bottom: 14px;
       padding: 0 4px;
@@ -215,39 +244,43 @@
     .opt {
       display: flex;
       align-items: center;
-      gap: 14px;
-      background: var(--card-bg);
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 18px;
+      gap: 16px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 15px 18px;
       cursor: pointer;
-      transition: border-color .18s, background .18s, box-shadow .18s;
+      transition: all .2s;
       user-select: none;
     }
-    .opt:active { transform: scale(.985); }
+    .opt:hover { background: rgba(255,255,255,0.16); }
+    .opt:active { transform: scale(.988); }
     .opt.selected {
-      border-color: var(--terra);
-      background: linear-gradient(135deg, rgba(196,112,75,.06) 0%, rgba(212,160,86,.06) 100%);
-      box-shadow: 0 4px 18px rgba(196,112,75,.14);
+      background: rgba(255,255,255,0.22);
+      border: 1.5px solid rgba(255,255,255,0.55);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
     }
 
-    .opt-icon { font-size: 28px; flex-shrink: 0; width: 36px; text-align: center; }
+    .opt-icon { font-size: 20px; flex-shrink: 0; width: 34px; text-align: center; color: rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; }
     .opt-text { flex: 1; }
-    .opt-label { font-size: 16px; font-weight: 500; color: var(--brown-dark); }
-    .opt-sub   { font-size: 12px; color: var(--brown-light); margin-top: 2px; }
+    .opt-label { font-size: 16px; font-weight: 600; color: white; letter-spacing: -0.01em; }
+    .opt-sub   { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 3px; font-weight: 400; }
 
     .opt-check {
-      width: 24px; height: 24px;
+      width: 22px; height: 22px;
       border-radius: 50%;
-      border: 2px solid var(--border);
+      border: 1.5px solid rgba(255,255,255,0.35);
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
       transition: all .18s;
     }
     .opt.selected .opt-check {
-      background: var(--terra);
-      border-color: var(--terra);
+      background: white;
+      border-color: white;
     }
+    .opt.selected .opt-check::after { border-color: var(--terra); }
     .opt-check::after {
       content: '';
       display: none;
@@ -260,7 +293,7 @@
 
     .q-footer {
       padding: 14px 16px 36px;
-      background: var(--cream);
+      background: transparent;
     }
 
     .btn-next {
@@ -272,7 +305,7 @@
       border-radius: 16px;
       font-size: 17px;
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       box-shadow: 0 6px 22px rgba(196,112,75,.3);
       transition: opacity .18s, transform .15s;
@@ -289,7 +322,7 @@
        LOADING SCREEN
     ══════════════════════════════ */
     #screen-loading {
-      background: linear-gradient(160deg, #FDF5EC 0%, #F5DFC4 100%);
+      background: transparent;
       align-items: center;
       justify-content: center;
       text-align: center;
@@ -307,12 +340,13 @@
     }
 
     .loading-title {
-      font-family: 'Playfair Display', serif;
+      color: white !important;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 22px;
-      color: var(--brown-dark);
+      color: white;
       margin-bottom: 8px;
     }
-    .loading-sub { font-size: 14px; color: var(--brown-mid); }
+    .loading-sub { font-size: 14px; color: rgba(255,255,255,0.7); }
 
     /* ══════════════════════════════
        RESULTS SCREEN
@@ -322,15 +356,17 @@
       padding: 52px 22px 24px;
     }
 
+    .results-title { color: white !important;
+    }
     .results-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 28px;
       font-weight: 700;
-      color: var(--brown-dark);
+      color: white;
       margin-bottom: 6px;
       padding-right: 52px;
     }
-    .results-sub { font-size: 13px; color: var(--brown-light); margin-bottom: 14px; padding-right: 52px; }
+    .results-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 14px; padding-right: 52px; }
 
     .results-badge {
       display: inline-block;
@@ -353,17 +389,21 @@
 
     /* Activity card */
     .a-card {
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 20px;
       padding: 18px;
       cursor: pointer;
       transition: transform .15s, box-shadow .15s;
-      box-shadow: 0 2px 14px rgba(0,0,0,.04);
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.93) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .a-card:active {
-      transform: scale(.985);
-      box-shadow: 0 1px 6px rgba(0,0,0,.04);
+      transform: scale(.988);
+      box-shadow: 0 2px 10px rgba(0,0,0,.12);
     }
 
     .card-top {
@@ -375,62 +415,72 @@
     .card-emoji { font-size: 38px; line-height: 1; flex-shrink: 0; }
     .card-thumb-wrap {
       position: relative;
-      width: 72px;
-      height: 72px;
+      width: 76px;
+      height: 76px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: linear-gradient(135deg, var(--peach) 0%, var(--rose) 100%);
+      border-radius: 12px;
+      overflow: hidden;
     }
     .card-thumb-wrap .card-emoji {
-      font-size: 38px;
-      line-height: 1;
+      font-size: 0;
+      display: none;
     }
     .card-thumb {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      border-radius: 14px;
+      border-radius: 12px;
       object-fit: cover;
     }
     .card-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 21px;
       font-weight: 600;
-      color: var(--brown-dark);
-      line-height: 1.3;
-      margin-bottom: 3px;
+      color: white;
+      line-height: 1.25;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
     }
-    .card-type { font-size: 12px; color: var(--brown-light); font-weight: 500; }
+    .card-type { font-size: 11px; color: var(--terra); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
 
     .card-desc {
       font-size: 14px;
       color: var(--brown-mid);
-      line-height: 1.55;
-      margin-bottom: 12px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+      font-weight: 400;
     }
 
     .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .tag {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      background: rgba(139,90,60,0.12);
-      color: var(--brown-dark);
+      gap: 5px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--brown-mid);
       font-size: 11px;
-      font-weight: 600;
-      padding: 5px 10px;
-      border-radius: 100px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.01em;
     }
-    .tag-gold { background: rgba(139,90,60,0.12); color: var(--brown-dark); }
+    .tag i { font-size: 12px; color: var(--terra); }
+    .tag-gold { background: transparent; border-color: var(--border); color: var(--brown-mid); }
 
     .sort-bar {
       display: flex;
       gap: 8px;
       padding: 10px 14px;
-      background: var(--cream);
-      border-bottom: 1px solid rgba(0,0,0,.06);
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       overflow-x: auto;
       scrollbar-width: none;
     }
@@ -439,11 +489,11 @@
       flex-shrink: 0;
       padding: 6px 14px;
       border-radius: 100px;
-      border: 1.5px solid var(--brown-light);
-      background: transparent;
-      color: var(--brown-mid);
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.75);
       font-size: 13px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-weight: 500;
       cursor: pointer;
       transition: background .15s, color .15s, border-color .15s;
@@ -456,7 +506,7 @@
 
     .results-footer {
       padding: 14px 16px 36px;
-      background: var(--cream);
+      background: transparent;
     }
     .btn-restart {
       width: 100%;
@@ -467,7 +517,7 @@
       border-radius: 16px;
       font-size: 16px;
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       transition: background .15s;
     }
@@ -488,7 +538,7 @@
     .modal-bg.open { display: flex; }
 
     .modal {
-      background: var(--card-bg);
+      background: rgba(255,255,255,0.12);
       border-radius: 28px 28px 0 0;
       padding: 20px 22px 52px;
       width: 100%;
@@ -539,7 +589,7 @@
     }
     .modal-emoji { font-size: 52px; text-align: center; display: block; margin-bottom: 14px; }
     .modal-name {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 22px;
       font-weight: 700;
       color: #fff;
@@ -595,7 +645,7 @@
       border-radius: 16px;
       font-size: 16px;
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
     }
     .modal-close-row {
@@ -614,7 +664,7 @@
       border-radius: 16px;
       font-size: 16px;
       font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       display: none;
     }
@@ -628,9 +678,9 @@
     }
     .no-results-icon { font-size: 52px; margin-bottom: 16px; }
     .no-results-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 22px;
-      color: var(--brown-dark);
+      color: white;
       margin-bottom: 8px;
     }
     .no-results-text { font-size: 14px; color: var(--brown-mid); line-height: 1.55; }
@@ -646,7 +696,7 @@
       width: 36px; height: 36px;
       border-radius: 50%;
       background: var(--peach-light);
-      border: 1.5px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.3);
       display: flex; align-items: center; justify-content: center;
       font-size: 17px;
       cursor: pointer;
@@ -690,8 +740,8 @@
     .icon-btn {
       position: absolute;
       top: 52px; right: 20px;
-      background: var(--card-bg);
-      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 50%;
       width: 42px; height: 42px;
       display: flex; align-items: center; justify-content: center;
@@ -744,7 +794,7 @@
       box-shadow: 0 2px 12px rgba(44,26,14,.07);
     }
     .dash-label { font-size: 14px; color: var(--brown-mid); margin-bottom: 8px; }
-    .dash-number { font-size: 52px; font-weight: 700; color: var(--terra); font-family: 'Playfair Display', serif; }
+    .dash-number { font-size: 52px; font-weight: 700; color: var(--terra); font-family: 'Cormorant Garamond', serif; }
     .dash-section-title { font-size: 15px; font-weight: 700; color: var(--brown-dark); margin: 4px 0 14px; }
     .dash-act-row {
       display: flex; align-items: center; gap: 12px;
@@ -763,7 +813,7 @@
     .dash-vibe-bar { background: var(--terra); border-radius: 99px; height: 8px; transition: width .4s; }
     .dash-ages-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     .dash-age-chip { background: #fff; border-radius: 12px; padding: 10px 16px; text-align: center; box-shadow: 0 2px 8px rgba(44,26,14,.06); min-width: 64px; }
-    .dash-age-num { display: block; font-size: 22px; font-weight: 700; color: var(--terra); font-family: 'Playfair Display', serif; }
+    .dash-age-num { display: block; font-size: 22px; font-weight: 700; color: var(--terra); font-family: 'Cormorant Garamond', serif; }
     .dash-age-count { display: block; font-size: 12px; color: var(--brown-mid); margin-top: 2px; }
 
     /* Login knop welkomstscherm */
@@ -801,10 +851,10 @@
       line-height: 1;
     }
     .favs-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 28px;
       font-weight: 700;
-      color: var(--brown-dark);
+      color: white;
       margin-bottom: 4px;
       padding-left: 44px;
     }
@@ -825,9 +875,9 @@
     }
     .favs-empty-icon { font-size: 56px; margin-bottom: 18px; }
     .favs-empty-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 22px;
-      color: var(--brown-dark);
+      color: white;
       margin-bottom: 8px;
     }
     .favs-empty-text { font-size: 14px; color: var(--brown-mid); line-height: 1.55; }
@@ -836,6 +886,7 @@
        NAAM SCHERM
     ══════════════════════════════ */
     #screen-name {
+      background: transparent;
       background: linear-gradient(160deg, #FDF5EC 0%, #F5DFC4 55%, #EDD0AA 100%);
       align-items: center;
       justify-content: center;
@@ -844,9 +895,9 @@
     }
     .name-icon { font-size: 64px; margin-bottom: 20px; display: block; }
     .name-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Cormorant Garamond', serif;
       font-size: 30px; font-weight: 700;
-      color: var(--brown-dark); margin-bottom: 10px;
+      color: white; margin-bottom: 10px;
     }
     .name-sub { font-size: 15px; color: var(--brown-mid); margin-bottom: 20px; max-width: 260px; }
     .name-label {
@@ -854,11 +905,14 @@
       text-transform: uppercase; letter-spacing: .06em;
       align-self: flex-start; margin-bottom: 6px; margin-top: 4px;
     }
+    .name-title { color: white !important; }
+    .name-sub { color: rgba(255,255,255,0.75) !important; }
+    .name-label { color: rgba(255,255,255,0.7) !important; }
     .name-input {
       width: 100%; background: var(--card-bg);
       border: 2px solid var(--border); border-radius: 16px;
       padding: 14px 20px; font-size: 18px;
-      font-family: 'Inter', sans-serif; color: var(--brown-dark);
+      font-family: 'DM Sans', sans-serif; color: var(--brown-dark);
       text-align: center; margin-bottom: 16px;
       outline: none; transition: border-color .18s;
     }
@@ -894,7 +948,7 @@
     .when-input {
       background: rgba(255,255,255,.8); border: 1.5px solid rgba(196,112,75,.35);
       border-radius: 14px; padding: 10px 14px; font-size: 15px;
-      font-family: 'Inter', sans-serif; color: var(--brown-dark);
+      font-family: 'DM Sans', sans-serif; color: var(--brown-dark);
       outline: none; transition: border-color .18s;
     }
     .when-input:focus { border-color: var(--terra); }
@@ -904,7 +958,7 @@
       border: 2px solid rgba(196,112,75,.4); color: var(--terra);
       padding: 14px 36px; border-radius: 100px;
       font-size: 15px; font-weight: 600;
-      font-family: 'Inter', sans-serif; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; cursor: pointer;
       transition: all .18s; position: relative; z-index: 1;
     }
     .btn-surprise:active { background: rgba(196,112,75,.08); }
@@ -974,10 +1028,10 @@
       flex: 1; display: flex; flex-direction: column;
       align-items: center; gap: 5px;
       padding: 11px 6px; border-radius: 14px;
-      border: 1.5px solid var(--border);
-      background: var(--card-bg); color: var(--brown-mid);
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.12); color: var(--brown-mid);
       font-size: 11px; font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer; text-decoration: none;
       transition: background .15s;
     }
@@ -1025,12 +1079,12 @@
       display: block; width: 100%; background: none; border: none;
       color: var(--terra); font-size: 13px; font-weight: 600;
       padding: 10px 16px; cursor: pointer; text-align: center;
-      border-top: 1px solid var(--border); font-family: 'Inter', sans-serif;
+      border-top: 1px solid var(--border); font-family: 'DM Sans', sans-serif;
     }
     .btn-suggest {
       display: block; background: none; border: none;
       color: var(--brown-light); font-size: 12px;
-      cursor: pointer; font-family: 'Inter', sans-serif;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
       text-align: center; width: 100%;
       padding: 4px 0 12px; transition: color .15s;
     }
@@ -1051,10 +1105,17 @@
 </head>
 <body>
 
+<!-- ── ACHTERGROND LAAG ── -->
+<div id="app-bg">
+  <img id="app-bg-img" src="" alt="" onerror="this.style.display='none'">
+  <div id="app-bg-overlay"></div>
+</div>
+
 <!-- ── NAAM INVOER (eerste keer) ── -->
 <div id="screen-name" class="screen">
-  <span class="name-icon">👋</span>
-  <h1 class="name-title">Even kennismaken!</h1>
+  <div style="background:rgba(255,255,255,0.12);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:36px 28px 32px;width:100%;max-width:360px;margin:auto">
+  <i class="ti ti-heart" style="font-size:32px;color:white;display:block;margin-bottom:16px"></i>
+  <h1 class="name-title" style="color:white">Even kennismaken!</h1>
   <p class="name-sub">Zodat we jullie de beste suggesties kunnen doen.</p>
   <label class="name-label">Jouw voornaam</label>
   <input type="text" id="name-input" class="name-input" placeholder="Voornaam…" maxlength="24" autocomplete="off"
@@ -1065,27 +1126,28 @@
     oninput="App.onNameInput()"
     onkeydown="if(event.key==='Enter')App.saveName()">
   <button class="btn-start" id="btn-name" style="opacity:.45;pointer-events:none" onclick="App.saveName()">Verder →</button>
+  </div>
 </div>
 
 <!-- ── WELCOME ── -->
 <div id="screen-welcome" class="screen active">
   <button class="welcome-login-btn" id="welcome-login-btn" onclick="FirebaseAuth.loginOrLogout()" title="Inloggen">
-    <span id="login-btn-content">👤</span>
+    <i class="ti ti-user"></i>
   </button>
-  <button class="welcome-login-btn" id="dash-btn" onclick="App.openDashboard()" title="Dashboard" style="display:none;left:72px">📊</button>
-  <button class="welcome-login-btn" id="notif-btn" onclick="FirebaseAuth.enableNotifications()" title="Meldingen inschakelen" style="display:none;left:124px">🔔</button>
+  <button class="welcome-login-btn" id="dash-btn" onclick="App.openDashboard()" title="Dashboard"><i class="ti ti-chart-bar"></i></button>
+  <button class="welcome-login-btn" id="notif-btn" onclick="FirebaseAuth.enableNotifications()" title="Meldingen"><i class="ti ti-bell"></i></button>
   <button class="welcome-fav-btn" onclick="App.openFavs('welcome')" title="Mijn favorieten">
-    <span class="btn-emoji">🤍</span>
+    <i class="ti ti-heart"></i>
     <span class="fav-count-badge" id="welcome-fav-badge"></span>
   </button>
-  <span class="welcome-icon">💑</span>
+  <i class="ti ti-heart" style="font-size:52px;color:var(--terra)"></i>
   <div class="logo">Date<span>ivety</span></div>
   <p class="welcome-greeting" id="welcome-greeting" style="display:none"></p>
   <p class="tagline">Vind jullie perfecte date in 30 seconden. Zonder gedoe.</p>
   <div class="when-label">Wanneer gaan jullie?</div>
   <div class="when-chips">
-    <div class="when-chip sel" id="when-any-btn"      onclick="App.pickWhen('any')">🤷 Maakt niet uit</div>
-    <div class="when-chip"    id="when-specific-btn"  onclick="App.pickWhen('specific')">📅 Kies datum & tijd</div>
+    <div class="when-chip sel" id="when-any-btn"      onclick="App.pickWhen('any')">Maakt niet uit</div>
+    <div class="when-chip"    id="when-specific-btn"  onclick="App.pickWhen('specific')"><i class="ti ti-calendar"></i> Kies datum & tijd</div>
   </div>
   <div id="when-picker" style="display:none;margin-bottom:20px;display:none">
     <div class="when-picker-row">
@@ -1095,7 +1157,7 @@
     <div id="when-picker-label" class="when-picker-label"></div>
   </div>
   <button class="btn-start" onclick="App.start()">Laten we beginnen →</button>
-  <button class="btn-surprise" onclick="App.surprise()">🎲 Verras me!</button>
+  <button class="btn-surprise" onclick="App.surprise()"><i class="ti ti-dice-3"></i> Verras me!</button>
 </div>
 
 <!-- ── VRAAG 1: Vibe ── -->
@@ -1185,19 +1247,19 @@
 
 <!-- ── LOADING ── -->
 <div id="screen-loading" class="screen">
-  <div class="loading-icon">💛</div>
+  <div class="loading-icon"><i class="ti ti-heart" style="font-size:52px;color:var(--terra)"></i></div>
   <div class="loading-title">Ik zoek de beste dates voor jullie…</div>
-  <p class="loading-sub">Even geduld 🔍</p>
+  <p class="loading-sub">Even geduld…</p>
 </div>
 
 <!-- ── RESULTS ── -->
 <div id="screen-results" class="screen">
   <div class="results-header" style="position:relative">
     <button class="icon-btn" onclick="App.openFavs('results')" title="Mijn favorieten">
-      <span class="btn-emoji">🤍</span>
+      <i class="ti ti-heart"></i>
       <span class="fav-count-badge" id="results-fav-badge"></span>
     </button>
-    <div class="results-title">Jullie date-ideeën 🎉</div>
+    <div class="results-title">Jullie date-ideeën</div>
     <div class="results-sub" id="results-sub"></div>
     <span class="results-badge" id="results-badge"></span>
   </div>
@@ -1207,7 +1269,7 @@
     <button class="sort-pill" id="sort-dur" onclick="App.setSort('dur')">Duur ↑</button>
     <button class="sort-pill" id="sort-rating" onclick="App.setSort('rating')">⭐ Beoordeling</button>
   </div>
-  <div class="weather-banner" id="weather-banner">🌧️ Het regent buiten — buitenactiviteiten zijn gemarkeerd.</div>
+  <div class="weather-banner" id="weather-banner"><i class="ti ti-cloud-rain"></i> Het regent buiten — buitenactiviteiten zijn gemarkeerd.</div>
   <div class="results-body" id="results-body"></div>
   <div class="results-footer">
     <button class="btn-restart" onclick="App.restart()">↺ Opnieuw zoeken</button>
@@ -1218,18 +1280,18 @@
 <div id="screen-dashboard" class="screen">
   <div class="favs-header">
     <button class="favs-back" onclick="App.restart()">←</button>
-    <div class="favs-title">📊 Dashboard</div>
+    <div class="favs-title">Dashboard</div>
   </div>
   <div style="padding:20px">
     <div class="dash-card">
       <div class="dash-label">Totaal gebruikers</div>
       <div class="dash-number" id="dash-users">—</div>
     </div>
-    <div class="dash-section-title">🎭 Meest gekozen vibes</div>
+    <div class="dash-section-title">Meest gekozen vibes</div>
     <div id="dash-vibes-list"></div>
-    <div class="dash-section-title">🎂 Leeftijdsverdeling</div>
+    <div class="dash-section-title">Leeftijdsverdeling</div>
     <div id="dash-ages-list"></div>
-    <div class="dash-section-title">🏆 Populairste activiteiten</div>
+    <div class="dash-section-title">Populairste activiteiten</div>
     <div id="dash-activities-list"></div>
   </div>
 </div>
@@ -1238,7 +1300,7 @@
 <div id="screen-favs" class="screen">
   <div class="favs-header">
     <button class="favs-back" id="favs-back-btn" onclick="App.closeFavs()">←</button>
-    <div class="favs-title">Mijn favorieten ❤️</div>
+    <div class="favs-title">Mijn favorieten</div>
     <div class="favs-sub" id="favs-sub"></div>
   </div>
   <div class="favs-body" id="favs-body"></div>
@@ -1255,18 +1317,18 @@
         <div class="modal-name" id="m-name"></div>
         <div class="modal-type" id="m-type"></div>
       </div>
-      <button class="btn-fav-modal" id="m-fav-btn" onclick="App.toggleFavFromModal()">🤍</button>
+      <button class="btn-fav-modal" id="m-fav-btn" onclick="App.toggleFavFromModal()" aria-label="Favoriet">🤍</button>
     </div>
     <p  class="modal-desc"   id="m-desc"></p>
     <div class="m-surprise-date-banner" id="m-surprise-date" style="display:none"></div>
     <div class="modal-grid"  id="m-grid"></div>
     <div class="modal-actions">
       <a class="modal-action-btn" id="m-maps-btn" href="#" target="_blank" rel="noopener">
-        <span class="action-icon">📍</span>
+        <i class="ti ti-map-pin"></i>
         <span>Maps</span>
       </a>
       <a class="modal-action-btn" id="m-website-btn" href="#" target="_blank" rel="noopener" style="display:none">
-        <span class="action-icon">🌐</span>
+        <i class="ti ti-world"></i>
         <span>Website</span>
       </a>
       <button class="modal-action-btn modal-action-whatsapp" onclick="App.shareWhatsApp()">
@@ -1276,7 +1338,7 @@
     </div>
     <div class="locations-section" id="m-locations-section" style="display:none">
       <div class="locations-header" onclick="App.toggleLocations()">
-        <span>📍 Locaties in Eindhoven</span>
+        <span><i class="ti ti-map-pin"></i> Locaties in Eindhoven</span>
         <span class="locations-arrow" id="m-locations-arrow">▼</span>
       </div>
       <div class="locations-list" id="m-locations-list" style="display:none"></div>
@@ -1284,11 +1346,11 @@
     <div class="modal-rating">
       <div class="rating-label">Heb je dit al gedaan? Geef een beoordeling:</div>
       <div class="rating-stars" id="m-stars">
-        <button class="star-btn" data-star="1" onclick="App.rateActivity(1)">☆</button>
-        <button class="star-btn" data-star="2" onclick="App.rateActivity(2)">☆</button>
-        <button class="star-btn" data-star="3" onclick="App.rateActivity(3)">☆</button>
-        <button class="star-btn" data-star="4" onclick="App.rateActivity(4)">☆</button>
-        <button class="star-btn" data-star="5" onclick="App.rateActivity(5)">☆</button>
+        <button class="star-btn" data-star="1" onclick="App.rateActivity(1)"><i class="ti ti-star"></i></button>
+        <button class="star-btn" data-star="2" onclick="App.rateActivity(2)"><i class="ti ti-star"></i></button>
+        <button class="star-btn" data-star="3" onclick="App.rateActivity(3)"><i class="ti ti-star"></i></button>
+        <button class="star-btn" data-star="4" onclick="App.rateActivity(4)"><i class="ti ti-star"></i></button>
+        <button class="star-btn" data-star="5" onclick="App.rateActivity(5)"><i class="ti ti-star"></i></button>
       </div>
     </div>
     <button class="btn-suggest" onclick="App.suggestLocation()">Ken jij een goede locatie? Laat het ons weten</button>
@@ -1584,34 +1646,34 @@ const ACTIVITIES = [
    QUESTION CONFIG
 ═══════════════════════════════════════════════ */
 const Q1 = [
-  { v:"romantisch",  e:"🌹", l:"Romantisch",  s:"Sfeer, gevoel, samen genieten" },
-  { v:"avontuurlijk",e:"⚡", l:"Avontuurlijk", s:"Spanning, actie, buiten de comfortzone" },
-  { v:"ontspannend", e:"🌿", l:"Ontspannend",  s:"Rustig, geen stress, lekker lui" },
-  { v:"sociaal",     e:"🎉", l:"Sociaal",      s:"Energie, gezelligheid, interactie" },
-  { v:"intiem",      e:"✨", l:"Intiem",        s:"1-op-1, diepgang, rustige verbinding" },
-  { v:"verbindend",  e:"🤝", l:"Verbindend",   s:"Samenwerken, iets samen ondernemen" },
-  { v:"competitief", e:"🏆", l:"Competitief",  s:"Winnen, uitdagen, sportief" },
-  { v:"creatief",    e:"🎨", l:"Creatief",     s:"Maken, ontdekken, expressie" },
-  { v:"uniek",       e:"🌟", l:"Uniek",        s:"Anders, bijzonder, onverwacht" },
-  { v:"seizoensgebonden", e:"🌸", l:"Seizoensgebonden", s:"Festivals, evenementen, jaarlijks" },
+  { v:"romantisch",  e:"heart", l:"Romantisch",  s:"Sfeer, gevoel, samen genieten" },
+  { v:"avontuurlijk",e:"mountain", l:"Avontuurlijk", s:"Spanning, actie, buiten de comfortzone" },
+  { v:"ontspannend", e:"leaf", l:"Ontspannend",  s:"Rustig, geen stress, lekker lui" },
+  { v:"sociaal",     e:"users", l:"Sociaal",      s:"Energie, gezelligheid, interactie" },
+  { v:"intiem",      e:"candle", l:"Intiem",        s:"1-op-1, diepgang, rustige verbinding" },
+  { v:"verbindend",  e:"link", l:"Verbindend",   s:"Samenwerken, iets samen ondernemen" },
+  { v:"competitief", e:"trophy", l:"Competitief",  s:"Winnen, uitdagen, sportief" },
+  { v:"creatief",    e:"palette", l:"Creatief",     s:"Maken, ontdekken, expressie" },
+  { v:"uniek",       e:"sparkles", l:"Uniek",        s:"Anders, bijzonder, onverwacht" },
+  { v:"seizoensgebonden", e:"calendar-event", l:"Seizoensgebonden", s:"Festivals, evenementen, jaarlijks" },
 ];
 const Q2 = [
-  { v:"laag",   e:"🛋️", l:"Lekker rustig",   s:"Geen zweet, gewoon genieten" },
-  { v:"middel", e:"🚶", l:"Beetje actief",    s:"In beweging, maar niet uitgeput" },
-  { v:"hoog",   e:"🔥", l:"Vol energie",      s:"Actief, sportief, zweten mag" },
+  { v:"laag",   e:"sofa", l:"Lekker rustig",   s:"Geen zweet, gewoon genieten" },
+  { v:"middel", e:"walk", l:"Beetje actief",    s:"In beweging, maar niet uitgeput" },
+  { v:"hoog",   e:"run", l:"Vol energie",      s:"Actief, sportief, zweten mag" },
 ];
 const Q3 = [
-  { v:"max 1 uur", e:"⏱️", l:"Max 1 uur",        s:"Snel en bondig" },
-  { v:"1-2 uur",   e:"⏰", l:"1 tot 2 uur",       s:"Lekker uitgebreid" },
-  { v:"2+ uur",    e:"🌅", l:"Meer dan 2 uur",    s:"Een echt dagdeel" },
-  { v:"any",       e:"🤷", l:"Maakt niet uit",    s:"Verras ons maar" },
+  { v:"max 1 uur", e:"clock", l:"Max 1 uur",        s:"Snel en bondig" },
+  { v:"1-2 uur",   e:"clock-hour-3", l:"1 tot 2 uur",       s:"Lekker uitgebreid" },
+  { v:"2+ uur",    e:"sunset-2", l:"Meer dan 2 uur",    s:"Een echt dagdeel" },
+  { v:"any",       e:"arrows-shuffle", l:"Maakt niet uit",    s:"Verras ons maar" },
 ];
 const Q4 = [
-  { v:"0-15",   e:"💚", l:"0 – €15 p.p.",      s:"Budget-friendly" },
-  { v:"15-40",  e:"💛", l:"€15 – €40 p.p.",  s:"Gemiddeld" },
-  { v:"40-100", e:"🧡", l:"€40 – €100 p.p.", s:"Lekker uitpakken" },
-  { v:"100+",   e:"💎", l:"€100+ p.p.",       s:"Geen limiet" },
-  { v:"any",    e:"🤷", l:"Maakt niet uit",   s:"Budget is geen thema" },
+  { v:"0-15",   e:"coin", l:"0 – €15 p.p.",      s:"Budget-friendly" },
+  { v:"15-40",  e:"coins", l:"€15 – €40 p.p.",  s:"Gemiddeld" },
+  { v:"40-100", e:"credit-card", l:"€40 – €100 p.p.", s:"Lekker uitpakken" },
+  { v:"100+",   e:"diamond", l:"€100+ p.p.",       s:"Geen limiet" },
+  { v:"any",    e:"arrows-shuffle", l:"Maakt niet uit",   s:"Budget is geen thema" },
 ];
 
 /* ═══════════════════════════════════════════════
@@ -2342,10 +2404,10 @@ const App = (() => {
     });
     // Hartje-emoji updaten op welkomstknop
     const wb = document.querySelector('.welcome-fav-btn .btn-emoji');
-    if (wb) wb.textContent = n > 0 ? '❤️' : '🤍';
+    if (wb) wb.innerHTML = n > 0 ? '<i class="ti ti-heart" style="color:var(--terra)"></i>' : '<i class="ti ti-heart"></i>';
     // Hartje-emoji updaten op results-knop
     const rb = document.querySelector('#screen-results .icon-btn .btn-emoji');
-    if (rb) rb.textContent = n > 0 ? '❤️' : '🤍';
+    if (rb) rb.innerHTML = n > 0 ? '<i class="ti ti-heart" style="color:var(--terra)"></i>' : '<i class="ti ti-heart"></i>';
   }
 
   function renderOpts(listId, opts, key, maxSel) {
@@ -2356,7 +2418,7 @@ const App = (() => {
       div.className = 'opt';
       div.dataset.val = o.v;
       div.innerHTML = `
-        <div class="opt-icon">${o.e}</div>
+        <div class="opt-icon"><i class="ti ti-${o.e}"></i></div>
         <div class="opt-text">
           <div class="opt-label">${o.l}</div>
           <div class="opt-sub">${o.s}</div>
@@ -2365,6 +2427,48 @@ const App = (() => {
       div.addEventListener('click', () => pick(div, key, maxSel, listId));
       el.appendChild(div);
     });
+  }
+
+  /* ── Achtergrond per vibe (Pexels) ── */
+  const VIBE_BG_QUERIES = {
+    romantisch:       'romantic couple dinner candlelight evening',
+    avontuurlijk:     'couple adventure outdoor kayak mountain',
+    ontspannend:      'couple relaxing nature peaceful afternoon',
+    sociaal:          'friends celebrating restaurant drinks laughing',
+    intiem:           'couple coffee cozy cafe intimate quiet',
+    verbindend:       'couple cooking workshop creating together',
+    competitief:      'couple sport competition fun active',
+    creatief:         'couple painting art workshop creative studio',
+    uniek:            'unique travel experience couple discovery',
+    seizoensgebonden: 'outdoor festival summer crowd music evening',
+  };
+  const DEFAULT_BG_QUERY = 'romantic couple date evening city lights';
+  const bgCache = {};
+
+  function fetchVibeBg(query) {
+    if (bgCache[query]) { applyBgImg(bgCache[query]); return; }
+    fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=portrait`, {
+      headers: { Authorization: PEXELS_KEY }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.photos && data.photos.length > 0) {
+        const idx = Math.floor(Math.random() * Math.min(3, data.photos.length));
+        const url = data.photos[idx].src.large2x || data.photos[idx].src.large;
+        bgCache[query] = url;
+        applyBgImg(url);
+      }
+    })
+    .catch(() => {});
+  }
+
+  function applyBgImg(url) {
+    const img = document.getElementById('app-bg-img');
+    if (img) {
+      img.style.opacity = '0';
+      img.onload = () => { img.style.opacity = '1'; };
+      img.src = url;
+    }
   }
 
   /* ── Kleurpaletten per vibe ── */
@@ -2396,16 +2500,14 @@ const App = (() => {
     r.style.setProperty('--rose',        p.rose);
     r.style.setProperty('--card-bg',     p.cardBg);
     r.style.setProperty('--border',      p.border);
-    document.body.style.background = p.cream;
-    document.body.style.color = p.brownDark;
-    document.querySelectorAll('.q-header').forEach(el => {
-      el.style.background = `linear-gradient(160deg, ${p.peach} 0%, ${p.cream} 100%)`;
-    });
-    document.querySelectorAll('.results-header').forEach(el => {
-      el.style.background = `linear-gradient(160deg, ${p.peach} 0%, ${p.cream} 100%)`;
-    });
+    document.body.style.background = 'transparent';
     const welcome = document.getElementById('screen-welcome');
-    if (welcome) welcome.style.background = `linear-gradient(160deg, ${p.cream} 0%, ${p.peach} 55%, ${p.rose} 100%)`;
+    if (welcome) welcome.style.background = 'transparent';
+  }
+
+  function applyVibeBg(vibe) {
+    const query = VIBE_BG_QUERIES[vibe] || DEFAULT_BG_QUERY;
+    fetchVibeBg(query);
   }
 
   function pick(card, key, maxSel, listId) {
@@ -2426,7 +2528,7 @@ const App = (() => {
     }
     if (key === 'vibe') {
       const activeVibe = Array.isArray(ans.vibe) ? ans.vibe[0] : ans.vibe;
-      if (activeVibe) applyPalette(activeVibe);
+      if (activeVibe) { applyPalette(activeVibe); applyVibeBg(activeVibe); }
     }
     const btnMap = { vibe:'btn1', intensity:'btn2', duration:'btn3', budget:'btn4' };
     const btn = document.getElementById(btnMap[key]);
@@ -2735,6 +2837,10 @@ const App = (() => {
     renderCards(regular, dateHighlights || []);
   }
 
+  
+  function stripEmoji(str) {
+    return str.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}]/gu, '').replace(/^[\s]+/, '').trim();
+  }
   const priceLabel = { '0-15':'0 – €15', '15-40':'€15 – €40', '40-100':'€40 – €100', '100+':'€100+' };
   const lvlLabel   = { laag:'😌 Rustig', middel:'🚶 Actief', hoog:'💪 Intensief' };
   const locLabel   = { binnen:'🏠 Binnen', buiten:'🌿 Buiten', beide:'🌿 Beide' };
@@ -2747,14 +2853,14 @@ const App = (() => {
     const isFav  = Favs.has(a.id);
     const stars  = Ratings.get(a.id);
     const rainTag = weatherRain && a.loc !== 'binnen'
-      ? '<span class="tag tag-rain">🌧️ Buiten</span>' : '';
+      ? '<span class="tag tag-rain"><i class="ti ti-cloud-rain"></i> Regen verwacht</span>' : '';
     const starsHtml = stars > 0
-      ? `<div class="card-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5 - stars)}<span style="font-size:11px;color:var(--brown-light);margin-left:5px">Jullie beoordeling</span></div>` : '';
+      ? `<div class="card-stars">${'<i class="ti ti-star-filled" style="color:var(--terra);font-size:13px"></i>'.repeat(stars)}${'<i class="ti ti-star" style="color:var(--border);font-size:13px"></i>'.repeat(5 - stars)}<span style="font-size:11px;color:var(--brown-light);margin-left:6px">Beoordeling</span></div>` : '';
     const dateHlTag = context === 'dateHighlight'
-      ? '<div class="date-hl-tag">📅 Speelt op deze dag</div>' : '';
+      ? '<div class="date-hl-tag"><i class="ti ti-calendar-event"></i> Speelt op deze dag</div>' : '';
     div.innerHTML = `
-      <button class="fav-btn ${isFav ? 'on' : ''}" data-id="${a.id}" title="${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}">
-        ${isFav ? '❤️' : '🤍'}
+      <button class="fav-btn ${isFav ? 'on' : ''}" data-id="${a.id}" aria-label="${isFav ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten'}">
+        ${isFav ? '<i class="ti ti-heart" style="color:var(--terra)"></i>' : '<i class="ti ti-heart"></i>'}
       </button>
       <div class="card-top" style="padding-right:44px">
         <div class="card-thumb-wrap">
@@ -2763,14 +2869,14 @@ const App = (() => {
         </div>
         <div>
           <div class="card-name">${a.name}</div>
-          <div class="card-type">${a.type}</div>
+          <div class="card-type">${stripEmoji(a.type)}</div>
         </div>
       </div>
       ${dateHlTag}
       <p class="card-desc">${a.desc}</p>
       <div class="card-tags">
-        <span class="tag tag-gold">💰 ${priceLabel[a.price]}</span>
-        <span class="tag">⏱ ${a.dur}</span>
+        <span class="tag tag-gold"><i class="ti ti-coin"></i> ${priceLabel[a.price]}</span>
+        <span class="tag"><i class="ti ti-clock"></i> ${a.dur}</span>
         <span class="tag">${lvlLabel[a.lvl]}</span>
         <span class="tag">${locLabel[a.loc]}</span>
         ${rainTag}
@@ -2805,7 +2911,7 @@ const App = (() => {
       // Sync alle hartjes met dit id over alle schermen
       document.querySelectorAll(`.fav-btn[data-id="${a.id}"]`).forEach(b => {
         b.classList.toggle('on', on);
-        b.textContent = on ? '❤️' : '🤍';
+        b.innerHTML = on ? '<i class="ti ti-heart" style="color:var(--terra)"></i>' : '<i class="ti ti-heart"></i>';
         b.title = on ? 'Verwijder uit favorieten' : 'Voeg toe aan favorieten';
       });
       updateBadges();
@@ -3297,6 +3403,28 @@ const Dashboard = (() => {
   }
   return { load };
 })();
+
+// Laad standaard achtergrond bij start
+document.addEventListener('DOMContentLoaded', () => {
+  const img = document.getElementById('app-bg-img');
+  if (img) {
+    img.style.transition = 'opacity 0.8s ease';
+    img.style.opacity = '0';
+  }
+  if (typeof PEXELS_KEY !== 'undefined') {
+    fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent('romantic couple date evening city lights')}&per_page=3&orientation=portrait`, {
+      headers: { Authorization: PEXELS_KEY }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.photos && data.photos.length > 0) {
+        const url = data.photos[0].src.large2x || data.photos[0].src.large;
+        if (img) { img.onload = () => { img.style.opacity = '1'; }; img.src = url; }
+      }
+    })
+    .catch(() => {});
+  }
+});
 </script>
 
 <!-- ── FIREBASE ── -->
