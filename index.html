@@ -352,12 +352,11 @@
        RESULTS SCREEN
     ══════════════════════════════ */
     .results-header {
-      background: linear-gradient(160deg, var(--peach) 0%, var(--cream) 100%);
+      background: transparent;
       padding: 52px 22px 24px;
     }
 
-    .results-title { color: white !important;
-    }
+    .results-title { color: white !important; }
     .results-title {
       font-family: 'Cormorant Garamond', serif;
       font-size: 28px;
@@ -365,6 +364,7 @@
       color: white;
       margin-bottom: 6px;
       padding-right: 52px;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.3);
     }
     .results-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 14px; padding-right: 52px; }
 
@@ -389,21 +389,20 @@
 
     /* Activity card */
     .a-card {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 20px;
       padding: 18px;
       cursor: pointer;
-      transition: transform .15s, box-shadow .15s;
-      box-shadow: 0 4px 20px rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.93) !important;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      transition: transform .15s, box-shadow .2s, background .2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
     }
+    .a-card:hover { background: rgba(255,255,255,0.15); }
     .a-card:active {
       transform: scale(.988);
-      box-shadow: 0 2px 10px rgba(0,0,0,.12);
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
     }
 
     .card-top {
@@ -421,9 +420,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--peach) 0%, var(--rose) 100%);
+      background: rgba(255,255,255,0.15);
       border-radius: 12px;
       overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.2);
     }
     .card-thumb-wrap .card-emoji {
       font-size: 0;
@@ -445,12 +445,13 @@
       line-height: 1.25;
       margin-bottom: 4px;
       letter-spacing: -0.01em;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.25);
     }
-    .card-type { font-size: 11px; color: var(--terra); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .card-type { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
 
     .card-desc {
-      font-size: 14px;
-      color: var(--brown-mid);
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
       line-height: 1.6;
       margin-bottom: 14px;
       font-weight: 400;
@@ -461,17 +462,17 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--brown-mid);
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
       font-size: 11px;
       font-weight: 500;
       padding: 4px 10px;
       border-radius: 6px;
       letter-spacing: 0.01em;
     }
-    .tag i { font-size: 12px; color: var(--terra); }
-    .tag-gold { background: transparent; border-color: var(--border); color: var(--brown-mid); }
+    .tag i { font-size: 12px; color: rgba(255,255,255,0.7); }
+    .tag-gold { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
 
     .sort-bar {
       display: flex;
@@ -693,21 +694,25 @@
     .fav-btn {
       position: absolute;
       top: 14px; right: 14px;
-      width: 36px; height: 36px;
+      width: 34px; height: 34px;
       border-radius: 50%;
-      background: var(--peach-light);
-      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.25);
       display: flex; align-items: center; justify-content: center;
-      font-size: 17px;
+      font-size: 16px;
+      color: rgba(255,255,255,0.85);
       cursor: pointer;
-      transition: background .18s, transform .15s, border-color .18s;
+      transition: background .18s, transform .15s;
       flex-shrink: 0;
       z-index: 2;
     }
     .fav-btn:active { transform: scale(.88); }
     .fav-btn.on {
-      background: #FDE8E8;
-      border-color: #E87070;
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.5);
+      color: var(--terra);
     }
 
     /* Kaart relatief zodat .fav-btn absoluut kan */
@@ -2431,21 +2436,24 @@ const App = (() => {
 
   /* ── Achtergrond per vibe (Pexels) ── */
   const VIBE_BG_QUERIES = {
-    romantisch:       'romantic couple dinner candlelight evening',
-    avontuurlijk:     'couple adventure outdoor kayak mountain',
-    ontspannend:      'couple relaxing nature peaceful afternoon',
-    sociaal:          'friends celebrating restaurant drinks laughing',
-    intiem:           'couple coffee cozy cafe intimate quiet',
-    verbindend:       'couple cooking workshop creating together',
-    competitief:      'couple sport competition fun active',
-    creatief:         'couple painting art workshop creative studio',
-    uniek:            'unique travel experience couple discovery',
-    seizoensgebonden: 'outdoor festival summer crowd music evening',
+    romantisch:       ['romantic dinner couple candles evening', 'couple restaurant date night', 'romantic date evening'],
+    avontuurlijk:     ['hiking adventure nature trail', 'outdoor adventure couple forest', 'mountain adventure landscape'],
+    ontspannend:      ['peaceful nature park relaxing', 'couple picnic park sunny', 'nature garden peaceful'],
+    sociaal:          ['friends laughing drinks restaurant', 'people celebrating bar night', 'social gathering drinks'],
+    intiem:           ['couple coffee cafe cozy', 'intimate coffee shop interior', 'cozy cafe warm light'],
+    verbindend:       ['couple cooking kitchen together', 'workshop hands creating craft', 'two people learning activity'],
+    competitief:      ['sport competition race active', 'padel tennis sport couple', 'active sport game fun'],
+    creatief:         ['art studio painting creative', 'pottery workshop hands clay', 'creative workshop art studio'],
+    uniek:            ['unique experience luxury travel', 'rooftop city view night', 'special experience outdoor adventure'],
+    seizoensgebonden: ['outdoor music festival summer', 'summer festival crowd lights', 'festival evening outdoor'],
   };
   const DEFAULT_BG_QUERY = 'romantic couple date evening city lights';
   const bgCache = {};
 
-  function fetchVibeBg(query) {
+  function fetchVibeBg(queries, idx) {
+    idx = idx || 0;
+    const query = Array.isArray(queries) ? queries[idx] : queries;
+    if (!query) return;
     if (bgCache[query]) { applyBgImg(bgCache[query]); return; }
     fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=portrait`, {
       headers: { Authorization: PEXELS_KEY }
@@ -2453,13 +2461,20 @@ const App = (() => {
     .then(r => r.json())
     .then(data => {
       if (data.photos && data.photos.length > 0) {
-        const idx = Math.floor(Math.random() * Math.min(3, data.photos.length));
-        const url = data.photos[idx].src.large2x || data.photos[idx].src.large;
+        const pick = data.photos[Math.floor(Math.random() * Math.min(3, data.photos.length))];
+        const url = pick.src.large2x || pick.src.large;
         bgCache[query] = url;
         applyBgImg(url);
+      } else if (Array.isArray(queries) && idx + 1 < queries.length) {
+        // Volgende fallback query proberen
+        fetchVibeBg(queries, idx + 1);
       }
     })
-    .catch(() => {});
+    .catch(() => {
+      if (Array.isArray(queries) && idx + 1 < queries.length) {
+        fetchVibeBg(queries, idx + 1);
+      }
+    });
   }
 
   function applyBgImg(url) {
@@ -2510,8 +2525,8 @@ const App = (() => {
   }
 
   function applyVibeBg(vibe) {
-    const query = VIBE_BG_QUERIES[vibe] || DEFAULT_BG_QUERY;
-    fetchVibeBg(query);
+    const queries = VIBE_BG_QUERIES[vibe] || VIBE_BG_QUERIES['romantisch'];
+    fetchVibeBg(queries, 0);
   }
 
   function pick(card, key, maxSel, listId) {
@@ -2833,9 +2848,9 @@ const App = (() => {
     const vibeNames = ans.vibe.map(v => Q1.find(o => o.v === v)?.l || v).join(' & ');
     if (title) title.textContent = Profile.hasName()
       ? `Hé ${Profile.name}, hier zijn jullie ideeën! 🎉`
-      : `Jullie date-ideeën 🎉`;
+      : `Jullie date-ideeën`;
     sub.textContent = `Op basis van: ${vibeNames}`;
-    badge.textContent = `${regular.length} date-ideeën gevonden ✨`;
+    badge.textContent = `${regular.length} date-ideeën gevonden`;
     const banner = document.getElementById('weather-banner');
     if (banner) banner.classList.toggle('show', weatherRain);
     renderCards(regular, dateHighlights || []);
@@ -3295,7 +3310,7 @@ const App = (() => {
         bgImg.style.transition = 'opacity 1s ease';
         bgImg.style.opacity = '0';
       }
-      fetchVibeBg(DEFAULT_BG_QUERY);
+      fetchVibeBg(VIBE_BG_QUERIES['romantisch'], 0);
       if (!Profile.hasName()) { show('screen-name'); }
     }
   };
