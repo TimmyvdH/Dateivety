@@ -940,6 +940,23 @@
     /* ══════════════════════════════
        WELKOM — EXTRA
     ══════════════════════════════ */
+    .region-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.32);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
     .welcome-greeting {
       font-size: 16px; color: rgba(255,255,255,0.9);
       margin-bottom: 4px; font-style: italic;
@@ -1171,6 +1188,7 @@
   </button>
   <i class="ti ti-heart" style="font-size:52px;color:var(--terra)"></i>
   <div class="logo">Date<span>ivety</span></div>
+  <div class="region-badge"><i class="ti ti-map-pin"></i> Regio Eindhoven</div>
   <p class="welcome-greeting" id="welcome-greeting" style="display:none"></p>
   <p class="tagline">Vind jullie perfecte date in 30 seconden. Zonder gedoe.</p>
   <div class="when-label">Wanneer gaan jullie?</div>
@@ -1737,11 +1755,26 @@ const Favs = (() => {
    SUGGESTIES — pas dit e-mailadres aan naar jouw eigen adres
 ═══════════════════════════════════════════════ */
 const SUGGEST_EMAIL = 'Dateivety@gmail.com';
-const PEXELS_KEY   = 'WtiQBPqNHCUmUSOZHJ36ZgEIUDCnGlFBlPdOqygYFaWHPD3ZmUVGDbt2';
-const imgCache     = {};
 
 /* ═══════════════════════════════════════════════
-   AFBEELDINGEN — Unsplash zoekwoorden per activiteit
+   AFBEELDINGEN — vooraf opgehaald bij Pexels, meegeleverd als statisch
+   JSON (activity-images.json, vibe-backgrounds.json). Er staat hierdoor
+   geen API-key meer in de browser en de app doet geen Pexels-calls meer
+   tijdens gebruik. Nieuwe activiteit toegevoegd? Draai het
+   regenereer-scriptje (scripts/fetch-images.js) om deze twee bestanden
+   opnieuw te vullen en commit ze mee.
+═══════════════════════════════════════════════ */
+let imgCache = {};       // { activityId: landscape-URL } — gevuld vanuit activity-images.json
+let vibeBgCache = {};    // { vibe: [portrait-URL, ...] }  — gevuld vanuit vibe-backgrounds.json
+const staticAssetsReady = Promise.all([
+  fetch('/Dateivety/activity-images.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+  fetch('/Dateivety/vibe-backgrounds.json').then(r => r.ok ? r.json() : {}).catch(() => ({}))
+]).then(([imgs, bgs]) => { imgCache = imgs; vibeBgCache = bgs; });
+
+/* ═══════════════════════════════════════════════
+   Pexels-zoekwoorden per activiteit — alleen nog gebruikt door
+   scripts/fetch-images.js om activity-images.json te (her)genereren,
+   niet meer op runtime uitgelezen door de app zelf.
 ═══════════════════════════════════════════════ */
 const ACTIVITY_IMGS = {
   1:"paddleboarding water",
@@ -2479,35 +2512,6 @@ const App = (() => {
     seizoensgebonden: ['outdoor music festival summer', 'summer festival crowd lights', 'festival evening outdoor'],
   };
   const DEFAULT_BG_QUERY = 'romantic couple date evening city lights';
-  const bgCache = {};
-
-  function fetchVibeBg(queries, idx) {
-    idx = idx || 0;
-    const query = Array.isArray(queries) ? queries[idx] : queries;
-    if (!query) return;
-    if (bgCache[query]) { applyBgImg(bgCache[query]); return; }
-    fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=5&orientation=portrait`, {
-      headers: { Authorization: PEXELS_KEY }
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.photos && data.photos.length > 0) {
-        const pick = data.photos[Math.floor(Math.random() * Math.min(3, data.photos.length))];
-        const url = pick.src.large2x || pick.src.large;
-        bgCache[query] = url;
-        applyBgImg(url);
-      } else if (Array.isArray(queries) && idx + 1 < queries.length) {
-        // Volgende fallback query proberen
-        fetchVibeBg(queries, idx + 1);
-      }
-    })
-    .catch(() => {
-      if (Array.isArray(queries) && idx + 1 < queries.length) {
-        fetchVibeBg(queries, idx + 1);
-      }
-    });
-  }
-
   function applyBgImg(url) {
     const img = document.getElementById('app-bg-img');
     if (!img) return;
@@ -2556,8 +2560,12 @@ const App = (() => {
   }
 
   function applyVibeBg(vibe) {
-    const queries = VIBE_BG_QUERIES[vibe] || VIBE_BG_QUERIES['romantisch'];
-    fetchVibeBg(queries, 0);
+    const showFromCache = () => {
+      const list = vibeBgCache[vibe] || vibeBgCache['romantisch'] || [];
+      if (list.length) applyBgImg(list[Math.floor(Math.random() * list.length)]);
+    };
+    showFromCache();
+    staticAssetsReady.then(showFromCache);
   }
 
   function pick(card, key, maxSel, listId) {
@@ -2933,24 +2941,13 @@ const App = (() => {
       </div>
       ${starsHtml}`;
 
-    // Thumbnail laden
+    // Thumbnail laden (uit vooraf opgehaalde activity-images.json)
     const thumbEl = div.querySelector(`#thumb-${a.id}`);
-    const keyword = ACTIVITY_IMGS[a.id] || a.name;
     const setThumb = src => { thumbEl.src = src; };
     if (imgCache[a.id]) {
       setThumb(imgCache[a.id]);
     } else {
-      fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=1&orientation=landscape`, {
-        headers: { Authorization: PEXELS_KEY }
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (data.photos && data.photos.length > 0) {
-          imgCache[a.id] = data.photos[0].src.landscape;
-          setThumb(imgCache[a.id]);
-        }
-      })
-      .catch(() => {});
+      staticAssetsReady.then(() => { if (imgCache[a.id]) setThumb(imgCache[a.id]); });
     }
 
     // Hartje stopt propagation zodat modal niet opent
@@ -2958,6 +2955,7 @@ const App = (() => {
       e.stopPropagation();
       Favs.toggle(a.id);
       const on = Favs.has(a.id);
+      _analytics.logEvent('favorite_toggled', { activity_id: a.id, activity_name: a.name, favorited: on });
       // Sync alle hartjes met dit id over alle schermen
       document.querySelectorAll(`.fav-btn[data-id="${a.id}"]`).forEach(b => {
         b.classList.toggle('on', on);
@@ -2983,25 +2981,19 @@ const App = (() => {
 
   function openModal(a) {
     modalActivity = a;
+    _analytics.logEvent('activity_viewed', { activity_id: a.id, activity_name: a.name });
     const heroImg = document.getElementById('m-hero-img');
     heroImg.style.display = 'none';
-    const keyword = ACTIVITY_IMGS[a.id] || a.name;
     if (imgCache[a.id]) {
       heroImg.src = imgCache[a.id];
       heroImg.style.display = 'block';
     } else {
-      fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=1&orientation=landscape`, {
-        headers: { Authorization: PEXELS_KEY }
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (data.photos && data.photos.length > 0) {
-          imgCache[a.id] = data.photos[0].src.landscape;
+      staticAssetsReady.then(() => {
+        if (imgCache[a.id] && modalActivity === a) {
           heroImg.src = imgCache[a.id];
           heroImg.style.display = 'block';
         }
-      })
-      .catch(() => {});
+      });
     }
     document.getElementById('m-name').textContent  = a.name;
     document.getElementById('m-type').textContent  = a.type;
@@ -3015,7 +3007,11 @@ const App = (() => {
     document.getElementById('m-maps-btn').href =
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.name + ' Eindhoven')}`;
     const wb = document.getElementById('m-website-btn');
-    if (a.url) { wb.href = a.url; wb.style.display = 'flex'; }
+    if (a.url) {
+      wb.href = a.url;
+      wb.style.display = 'flex';
+      wb.onclick = () => _analytics.logEvent('website_clicked', { activity_id: a.id, activity_name: a.name });
+    }
     else { wb.style.display = 'none'; }
     syncModalFavBtn();
     syncModalRating();
@@ -3208,15 +3204,23 @@ const App = (() => {
     },
     suggestLocation() {
       if (!modalActivity) return;
-      const act  = modalActivity.name;
-      const sub  = encodeURIComponent('Locatiesuggestie: ' + act);
-      const body = encodeURIComponent(
-        'Activiteit: ' + act + '\n\n' +
-        'Naam van de locatie:\n\n' +
-        'Adres of korte omschrijving:\n\n' +
-        'Website of Maps-link (optioneel):\n'
-      );
-      window.open('mailto:' + SUGGEST_EMAIL + '?subject=' + sub + '&body=' + body);
+      const act = modalActivity.name;
+      const naam = (prompt('Naam van de locatie:') || '').trim();
+      if (!naam) return;
+      const info = (prompt('Adres of korte omschrijving (optioneel):') || '').trim();
+      const link = (prompt('Website of Maps-link (optioneel):') || '').trim();
+      _db.collection('locationSuggestions').add({
+        activityId:   modalActivity.id,
+        activityName: act,
+        naam, info, link,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        _analytics.logEvent('location_suggested', { activity_id: modalActivity.id });
+        alert('Bedankt! We nemen het mee.');
+      }).catch(e => {
+        console.error('suggestLocation:', e);
+        alert('Er ging iets mis bij het versturen, probeer het later nog eens.');
+      });
     },
     shareWhatsApp() {
       if (!modalActivity) return;
@@ -3230,6 +3234,7 @@ const App = (() => {
       }
       var text = 'Zin in ' + a.name + '?\n\n' + a.desc;
       if (url) { text += '\n\nMeer info: ' + url; }
+      _analytics.logEvent('whatsapp_shared', { activity_id: a.id, activity_name: a.name });
       window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     },
     rateActivity(stars) {
@@ -3335,13 +3340,13 @@ const App = (() => {
     init() {
       updateBadges();
       updateGreeting();
-      // Laad standaard achtergrond (binnen IIFE zodat PEXELS_KEY beschikbaar is)
+      // Laad standaard achtergrond uit de vooraf opgehaalde vibe-backgrounds.json
       const bgImg = document.getElementById('app-bg-img');
       if (bgImg) {
         bgImg.style.transition = 'opacity 1s ease';
         bgImg.style.opacity = '0';
       }
-      fetchVibeBg(VIBE_BG_QUERIES['romantisch'], 0);
+      applyVibeBg('romantisch');
       if (!Profile.hasName()) { show('screen-name'); }
     }
   };
